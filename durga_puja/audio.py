@@ -154,7 +154,7 @@ def build():
     # bansuri phrases (D major pentatonic), resting in the 2020 scene
     phrase = [(SA * 4, 2), (SA * 4.5, 1), (SA * 5, 1), (SA * 6, 2), (SA * 5, 1), (SA * 4.5, 1), (SA * 4, 4),
               (SA * 3, 2), (SA * 4, 2), (SA * 4.5, 3), (SA * 4, 1), (SA * 3.375, 4)]
-    t, j = B[1] + 1.0, 0
+    t, j = B[1] + 0.3, 0
     while t < end - 3:
         f, beats = phrase[j % len(phrase)]
         if not (B[5] <= t < B[6]):
@@ -170,7 +170,7 @@ def build():
         v = vel[s]
         if v <= 0:
             continue
-        t0, t1 = B[s] + 0.4, (B[s + 1] if s + 1 < len(B) else end - 1.0)
+        t0, t1 = B[s] + 0.1, (B[s + 1] if s + 1 < len(B) else end - 1.0)
         t = t0
         while t < t1:
             for i, ch in enumerate(pattern):
@@ -188,14 +188,14 @@ def build():
     for k, b in enumerate(B[1:], 1):
         place(out, ghanta(880 if k % 2 else 990, 0.8), b - 0.05, 1.0, pan=0.3 if k % 2 else -0.3)
     for k in range(3):
-        place(out, ghanta([1320, 1480, 1760][k], 0.35), B[5] + 2 + k * 3.0, 1.0, pan=[-0.6, 0.6, 0][k])
-    place(out, shankh(3.2), 0.3, 1.0)
-    place(out, shankh(3.0, 330), B[6] + 1.8, 0.9)
-    place(out, shankh(4.0), end - 6.0, 0.9)
+        place(out, ghanta([1320, 1480, 1760][k], 0.35), B[5] + 0.4 + k * 0.8, 1.0, pan=[-0.6, 0.6, 0][k])
+    place(out, shankh(2.6), 0.1, 1.0)
+    place(out, shankh(2.2, 330), B[6] + 0.7, 0.9)
+    place(out, shankh(2.8), end - 3.0, 0.9)
     out = reverb(out, 3.0, 0.3)
     out = np.stack([lp(out[:, c], 7000) for c in range(2)], 1)
     t = np.arange(N) / SR
-    out *= (np.clip(t / 0.8, 0, 1) * np.clip((end - t) / 2.0, 0, 1))[:, None]
+    out *= (np.clip(t / 0.8, 0, 1) * np.clip((end - t) / 1.0, 0, 1))[:, None]
     out = out[: int(end * SR)]
     return out / np.abs(out).max() * 0.44  # ~ -20 LUFS: calm, not intense
 

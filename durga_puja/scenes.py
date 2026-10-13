@@ -554,7 +554,7 @@ def d_intro(A, lt):
     halo_and_durga(fr, A, 900, 1320, lt, dx=10)
     z = 1.28 - 0.28 * ease_io(prog(lt, 0, LENGTHS[0] * 0.8))
     fr = camera(fr, z, cy=760)
-    p = ease_out(prog(lt, 2.4, 1.0))
+    p = ease_out(prog(lt, 0.5, 0.6))
     blit(fr, A["title"], W / 2, 1640 + (1 - p) * 80, alpha=p)
     return fr
 
@@ -599,7 +599,7 @@ def d_world(A, lt):
         bob = -abs(math.sin(lt * 3 + k)) * 8
         paste(fr, sp, int(x - 5 - sp.shape[1] / 2), int(y + bob - sp.shape[0] / 2))
     for k, s in enumerate(A["strips"]):
-        p = ease_out(prog(lt, 0.4 + k * 0.7, 1.0))
+        p = ease_out(prog(lt, 0.15 + k * 0.3, 0.55))
         paste(fr, s["spr"], int((1 - p) * W * s["side"]), s["y"])
     return camera(fr, 1.0 + 0.02 * clamp(lt / LENGTHS[4]), cy=H * 0.5)
 
@@ -608,7 +608,7 @@ def d_2020(A, lt):
     fr = A["bg"].copy()
     draw_crowd(fr, A["crowd"], lt)
     x0, y0, x1, y1 = [int(v) for v in A["screen"]]
-    p = ease_out(prog(lt, 0.6, 1.2))
+    p = ease_out(prog(lt, 0.15, 0.6))
     yoff = int((1 - p) * 900)
     paste(fr, A["phone"], 0, yoff)
     paste(fr, A["screen_img"][: y1 - y0, : x1 - x0], x0, y0 + yoff)
@@ -632,7 +632,7 @@ def d_2021(A, lt):
                  alpha=(1 - t))
     halo_and_durga(fr, A, 1110, 1300, lt, dx=8)
     draw_crowd(fr, A["crowd"], lt)
-    p = prog(lt, 2.2, 0.6)
+    p = prog(lt, 0.9, 0.5)
     if p > 0:
         blit(fr, A["seal"], 880, 470, scale=1.0 + 1.4 * (1 - ease_back(p, 2.0)), rot=-12, alpha=clamp(p * 3))
     return camera(fr, 1.0 + 0.035 * clamp(lt / LENGTHS[6]), cy=H * 0.5)
@@ -640,7 +640,7 @@ def d_2021(A, lt):
 
 def d_today(A, lt):
     fr = A["bg"].copy()
-    px = 540 + 120 * ease_io(prog(lt, 0.5, 9.0))
+    px = 540 + 120 * ease_io(prog(lt, 0.0, 3.0))
     bob = 5 * math.sin(lt * 4)
     blit(fr, A["durga"], px, 960 + bob, anchor=(0.5, 1.0))
     blit(fr, A["platform"], px, 950 + bob, anchor=(0.5, 0))
@@ -653,7 +653,7 @@ def d_today(A, lt):
         y = 1900 - ((lt + rng.uniform(0, 10)) * sp) % 900
         blit(fr, A["sindoor"], x0 + 30 * math.sin(lt + k), y, alpha=0.7)
     fr = camera(fr, 1.0 + 0.03 * clamp(lt / LENGTHS[7]), cy=H * 0.5)
-    p = ease_out(prog(lt, LENGTHS[7] - 4.6, 1.2))
+    p = ease_out(prog(lt, 1.3, 0.5))
     if p > 0:
         fr *= (1 - 0.35 * p)
         blit(fr, A["final"], W / 2, 900 + (1 - p) * 60, alpha=p)
@@ -679,9 +679,9 @@ def scene_frame(A, k, lt):
     fr = DRAW[k](A["s"][k], lt)
     cap = A["caps"][k]
     if cap is not None:
-        p = ease_out(prog(lt, 0.9, 0.8))
+        p = ease_out(prog(lt, 0.25, 0.4))
         if k == 7:
-            p *= 1 - prog(lt, LENGTHS[7] - 4.8, 0.6)
+            p *= 1 - prog(lt, 1.1, 0.3)
         blit(fr, cap, W / 2, 26 + (1 - p) * -40, alpha=p, anchor=(0.5, 0))
     return fr
 

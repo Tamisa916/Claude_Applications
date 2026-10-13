@@ -1,6 +1,6 @@
 # Durga Puja · দুর্গাপূজা: fifty years of celebration (1975–2025)
 
-A 57-second, 9:16 motion-design film. Every frame is drawn in code as flat Bengali poster illustration (bold outlines, flat colour, saree-print textiles, crowded compositions), and it is scored with a calm, synthesized *pujar sound*.
+A 24-second, 9:16 motion-design film (3 s per scene). Every frame is drawn in code as flat Bengali poster illustration (bold outlines, flat colour, saree-print textiles, crowded compositions), and it is scored with a calm, synthesized *pujar sound*.
 
 | # | Scene | Caption |
 |---|---|---|

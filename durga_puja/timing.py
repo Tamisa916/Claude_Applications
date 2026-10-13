@@ -3,8 +3,8 @@ W, H, FPS = 1080, 1920, 30
 BPM = 96
 BEAT = 60.0 / BPM
 # intro, then seven scenes (1975, 1985, 2000s, world, 2020, 2021, today/Bijoya)
-LENGTHS = [5.0, 7.0, 7.0, 7.5, 8.0, 6.5, 7.0, 9.0]   # 57 s total (under 60)
-TR = 0.8          # alpana transition length
+LENGTHS = [3.0] * 8   # every scene 3 s -> 24 s total
+TR = 0.45         # alpana transition length
 TOTAL = sum(LENGTHS)
 
 

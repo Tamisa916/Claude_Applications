@@ -83,7 +83,7 @@ def render_frame(fidx):
     t = fidx / FPS
     fr = scenes.draw(X, t)
     fr *= TEX[..., None]
-    fade = min(1.0, t / 0.6, max(0.0, (TOTAL - t) / 1.0))
+    fade = min(1.0, t / 0.3, max(0.0, (TOTAL - t) / 0.6))
     fr *= fade
     return (np.clip(fr, 0, 1) * 255 + 0.5).astype(np.uint8)
 
