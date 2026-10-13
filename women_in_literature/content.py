@@ -1,12 +1,12 @@
 """Script content: one archetype per decade, 1900-1999."""
 
-INTRO_PORTRAIT = dict(hair_style="bob", cloth_pattern="flowers", tilt=-16, eyes="closed", seed=11)
+INTRO_PORTRAIT = dict(hair_style="bob", cloth_pattern="flowers", tilt=-16, eyes="open", seed=11)
 
 DECADES = [
     dict(year="1900s", arche="THE ORNAMENT", who="Lily Bart", book="The House of Mirth",
          author="Edith Wharton", pub="1905", line="Raised to be admired, and to marry well.",
          bg="#e2b33c", ink="dark", props="frame",
-         portrait=dict(hair_style="updo", hair="#5a3424", hair_hi="#a0694a", eyes="closed", neckline="high",
+         portrait=dict(hair_style="updo", hair="#5a3424", hair_hi="#a0694a", eyes="open", neckline="high",
                        cloth="#f1e3cc", cloth_hi="#d8bf9e", acc=("lace", "pearls", "earrings"), tilt=6, seed=21)),
     dict(year="1910s", arche="THE PIONEER", who="Ántonia Shimerda", book="My Ántonia",
          author="Willa Cather", pub="1918", line="Strength measured in harvests, not husbands.",
@@ -23,7 +23,7 @@ DECADES = [
     dict(year="1930s", arche="THE SEEKER", who="Janie Crawford", book="Their Eyes Were Watching God",
          author="Zora Neale Hurston", pub="1937", line="Under a pear tree, she dreams of a life of her own.",
          bg="#c8613a", ink="light", props="blossom",
-         portrait=dict(hair_style="long", hair="#1c1210", hair_hi="#5a4038", eyes="closed", neckline="round",
+         portrait=dict(hair_style="long", hair="#1c1210", hair_hi="#5a4038", eyes="open", neckline="round",
                        cloth="#e9b949", cloth_hi="#c9902a", skin="#8a5638", shadow="#5e3622", blush="#a5503a",
                        lips="#8e3a2e", tilt=-9, seed=51)),
     dict(year="1940s", arche="THE FEMME FATALE", who="Phyllis Nirdlinger", book="Double Indemnity",
@@ -41,7 +41,7 @@ DECADES = [
     dict(year="1960s", arche="THE MADWOMAN", who="Antoinette Cosway", book="Wide Sargasso Sea",
          author="Jean Rhys", pub="1966", line="Jane Eyre’s “madwoman in the attic” tells her side.",
          bg="#d14f2a", ink="light", props="fire",
-         portrait=dict(hair_style="wild", hair="#1e1310", hair_hi="#5c3a2a", eyes="closed", neckline="boat",
+         portrait=dict(hair_style="wild", hair="#1e1310", hair_hi="#5c3a2a", eyes="open", neckline="boat",
                        cloth="#f4e8d6", cloth_hi="#d6c2a6", skin="#e6c2a2", shadow="#b07e62", tilt=-14,
                        seed=81)),
     dict(year="1970s", arche="THE LIBERATED", who="Isadora Wing", book="Fear of Flying",

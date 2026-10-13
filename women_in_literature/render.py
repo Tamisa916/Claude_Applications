@@ -212,7 +212,7 @@ def build_assets():
     X["arcs"] = A.build_arcs()
     X["plane"] = A.build_plane()
     X["handmaid"] = A.build_handmaid()
-    X["card"], X["card_pad"] = A.build_card(940, 625)
+    X["card"], X["card_pad"] = A.build_card(940, 600)
     X["hl"] = []
     X["polaroids"] = []
     for i, d in enumerate(DECADES):
@@ -267,8 +267,8 @@ def build_text():
         e["who"] = Text(d["who"], font("serif_i", 58, 700), INK)
         e["book"] = Text(d["book"], fit_font(d["book"], "serif_i", 42, 400, 840), hexc("#5a2a1e"))
         e["auth"] = Text(f"{d['author'].upper()}  ·  {d['pub']}", font("sans", 28, 600), hexc("#7a4a3a"), tracking=2)
-        hf = font("hand", 74, 700)
-        e["line"] = [Text(s, hf, RED) for s in wrap(d["line"], hf, 860)]
+        hf = font("hand", 56, 700)
+        e["line"] = [Text(s, hf, RED) for s in wrap(d["line"], hf, 840)]
         yf = font("serif", 200, 900)
         e["yink"] = ink
         T["dec"].append(e)
@@ -390,7 +390,7 @@ def draw_card(fr, i, lt):
     p = ease_back(prog(lt, CARD_IN, 0.5), 1.2)
     if p <= 0:
         return
-    cx0, cy0 = 70, 1200 + (1 - p) * 820
+    cx0, cy0 = 70, 1265 + (1 - p) * 760
     rot = -1.2
     card = X["card"]
     pad = X["card_pad"]
@@ -417,7 +417,7 @@ def draw_card(fr, i, lt):
     for k, ln in enumerate(e["line"]):
         lp = prog(lt, LINE_IN + k * LINE_DUR * 0.8, LINE_DUR)
         if lp > 0:
-            ln.draw(fr, lx, cy0 + 392 + k * 80, frac=ease_io(lp))
+            ln.draw(fr, lx, cy0 + 398 + k * 62, frac=ease_io(lp))
 
 
 def portrait_motion(lt, start=0.05):

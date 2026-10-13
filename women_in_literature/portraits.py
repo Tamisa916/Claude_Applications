@@ -147,8 +147,8 @@ def draw_portrait(spec):
 
     # ---------------- body ----------------
     B = Layer(PW, PH)
-    neck = [(CX - 66, CY + 90 + lift), (CX + 66, CY + 90 + lift), (CX + 62, CY + 220), (CX + 84, CY + 330),
-            (CX - 88, CY + 330), (CX - 64, CY + 220)]
+    neck = [(CX - 56, CY + 110 + lift), (CX + 56, CY + 110 + lift), (CX + 54, CY + 235), (CX + 78, CY + 335),
+            (CX - 82, CY + 335), (CX - 56, CY + 235)]
     B.paint(B.mpoly(neck, smooth=False, blur=3), C["skin"])
     torso = [(CX - 74, CY + 300), (CX - 210, CY + 395), (CX - 370, CY + 470), (CX - 445, CY + 620),
              (CX - 470, PH + 40), (CX + 470, PH + 40), (CX + 445, CY + 620), (CX + 370, CY + 470),
@@ -234,72 +234,81 @@ def draw_portrait(spec):
 
     # ---------------- face ----------------
     F = Layer(PW, PH)
-    fo = [(x, y + lift) for x, y in face_outline()]
+    # long oval face, defined cheekbones and jaw (after the yellow-dress reference)
+    frx, fry = 128, 206
+    fo = [(CX + x, CY + 6 + y + lift) for x, y in [
+        (0, -fry), (frx * 0.9, -fry * 0.62), (frx, -fry * 0.12), (frx * 0.97, fry * 0.22),
+        (frx * 0.80, fry * 0.58), (frx * 0.52, fry * 0.86), (frx * 0.2, fry * 0.99), (0, fry * 1.01),
+        (-frx * 0.2, fry * 0.99), (-frx * 0.52, fry * 0.86), (-frx * 0.80, fry * 0.58), (-frx * 0.97, fry * 0.22),
+        (-frx, -fry * 0.12), (-frx * 0.9, -fry * 0.62)]]
     fm = F.mpoly(fo, blur=1.2)
     for sgn in (-1, 1):  # ears
-        F.paint(F.mell((CX + sgn * RX * 0.97, CY + 25 + lift), (24, 44), blur=1.5), mix(C["skin"], C["shadow"], 0.25))
+        F.paint(F.mell((CX + sgn * frx * 0.97, CY + 30 + lift), (20, 40), blur=1.5), mix(C["skin"], C["shadow"], 0.25))
     F.paint(fm, C["skin"])
     hi = mix(C["skin"], hexc("#fff4ea"), 0.35)   # highlight relative to this skin tone
     yy, xx = np.mgrid[0:PH, 0:PW].astype(np.float32)
-    ramp = np.clip((xx - (fx + 20)) / 120, 0, 1) * fm
-    F.shade(cv2.GaussianBlur(ramp, (0, 0), 10), C["shadow"], 0.9)
-    ey = CY + 10 + lift
-    for ex in (fx - 64, fx + 64):
-        F.shade(F.mell((ex, ey - 8), (48, 26), blur=12), C["shadow"], 0.35)  # socket
-        F.shade(F.mell((ex - 4, ey + 70), (52, 34), blur=20), C["blush"], 0.5)  # cheek
-    F.shade(F.mline([(fx + 14, ey - 30), (fx + 22, ey + 40), (fx + 22, ey + 82)], 16, 10, blur=8), C["shadow"], 0.45)
-    F.shade(F.mline([(fx - 6, ey - 30), (fx - 6, ey + 60)], 12, 10, blur=8), hi, 0.45)
-    F.shade(F.mell((fx, ey + 82), (18, 14), blur=6), hi, 0.45)
-    F.shade(F.mell((fx + 2, ey + 106), (30, 9), blur=5), C["shadow"], 0.55)
-    F.shade(F.mell((fx - 30, CY - 120 + lift), (80, 40), blur=30), hi, 0.25)
-    F.shade(F.mell((fx, CY + 178 + lift), (34, 16), blur=12), hi, 0.45)
-    F.shade(F.mell((fx, CY + 165 + lift), (40, 12), blur=8), C["shadow"], 0.4)  # under-lip
-    # lips (flat)
-    my = CY + 145 + lift
-    up = [(fx - 48, my), (fx - 22, my - 15), (fx, my - 8), (fx + 22, my - 15), (fx + 48, my), (fx, my + 2)]
-    lo = [(fx - 45, my + 1), (fx - 22, my + 21), (fx + 22, my + 21), (fx + 45, my + 1), (fx, my + 4)]
+    ramp = np.clip((xx - (fx + 24)) / 110, 0, 1) * fm
+    F.shade(cv2.GaussianBlur(ramp, (0, 0), 10), C["shadow"], 0.85)
+    ey = CY + 4 + lift
+    EX = 54
+    for ex in (fx - EX, fx + EX):
+        F.shade(F.mell((ex, ey - 6), (40, 22), blur=10), C["shadow"], 0.45)       # deep sockets, heavy lids
+        F.shade(F.mell((ex - 2, ey + 64), (40, 26), blur=18), C["blush"], 0.35)    # soft blush
+    F.shade(F.mell((fx + 96, ey + 82), (30, 62), ang=18, blur=20), C["shadow"], 0.35)   # cheek hollow
+    F.shade(F.mell((fx - 92, ey + 82), (26, 56), ang=-18, blur=16), C["shadow"], 0.22)
+    F.shade(F.mell((fx - 74, ey + 44), (34, 20), ang=-15, blur=16), hi, 0.18)          # cheekbone light
+    # long straight nose
+    F.shade(F.mline([(fx + 12, ey - 22), (fx + 15, ey + 60), (fx + 20, ey + 98)], 12, 9, blur=6), C["shadow"], 0.55)
+    F.shade(F.mline([(fx - 4, ey - 26), (fx - 3, ey + 84)], 10, 9, blur=7), hi, 0.3)
+    F.shade(F.mell((fx, ey + 100), (19, 13), blur=6), hi, 0.3)
+    F.shade(F.mell((fx + 2, ey + 118), (24, 8), blur=5), C["shadow"], 0.6)
+    for sgn in (-1, 1):
+        F.shade(F.mell((fx + sgn * 20, ey + 106), (9, 8), blur=4), C["shadow"], 0.45)
+    F.shade(F.mline([(fx, ey + 122), (fx, ey + 138)], 10, 10, blur=4), C["shadow"], 0.22)  # philtrum
+    my = ey + 152
+    F.shade(F.mell((fx, my + 24), (28, 8), blur=6), C["shadow"], 0.45)          # under-lip
+    F.shade(F.mell((fx - 6, my + 56), (26, 14), blur=12), hi, 0.2)            # chin
+    F.shade(F.mell((fx - 34, CY - 112 + lift), (70, 34), blur=30), hi, 0.15)   # forehead
+    up = [(fx - 34, my), (fx - 15, my - 11), (fx, my - 6), (fx + 15, my - 11), (fx + 34, my), (fx, my + 2)]
+    lo = [(fx - 32, my + 1), (fx - 15, my + 16), (fx + 15, my + 16), (fx + 32, my + 1), (fx, my + 3)]
     eyes = s["eyes"]
-    if eyes in ("open", "down"):
-        for ex in (fx - 64, fx + 64):
-            al = [(ex - 38, ey + 2), (ex - 10, ey - 13), (ex + 14, ey - 13), (ex + 38, ey), (ex + 12, ey + 11),
-                  (ex - 14, ey + 11)]
-            F.paint(F.mpoly(al, blur=1.5), mix(C["skin"], hexc("#efe4da"), 0.6))
+    AL = lambda ex: [(ex - 31, ey + 2), (ex - 10, ey - 11), (ex + 12, ey - 11), (ex + 31, ey - 1), (ex + 10, ey + 9),
+                     (ex - 12, ey + 9)]
     painterize(F, seed + 3, passes=((3500, 22, 5, 9), (5000, 12, 3, 6)), jitter=0.025, hue=0.006,
                angle_noise=0.3, edge_fuzz=False, highlight=0.02, soft=0.3)
+    if eyes in ("open", "down"):  # eye whites after the brushwork so strokes don't smear them
+        for ex in (fx - EX, fx + EX):
+            F.paint(F.mpoly(AL(ex), blur=1.8), mix(C["skin"], hexc("#efe4da"), 0.45))
     # soft gouache details: no outlines, just darker / lighter planes
-    F.paint(F.mpoly(lo, blur=2.2), mix(C["lips"], hexc("#ffffff"), 0.1))
-    F.paint(F.mpoly(up, blur=2.2), mix(C["lips"], hexc("#000000"), 0.15))
-    dark = mix(hexc("#2c1915"), C["shadow"], 0.25)
-    for side, ex in ((-1, fx - 64), (1, fx + 64)):
-        inner = ex - side * 40
-        outer = ex + side * 44
-        bpts = [(inner, ey - 40), (ex - side * 6, ey - 52), (outer, ey - 44)]
-        F.paint(F.mline(bpts, 15, 6, blur=3.0), mix(brow, C["skin"], 0.3), 0.9)
+    F.paint(F.mpoly(lo, blur=2.0), mix(C["lips"], hexc("#ffffff"), 0.08))
+    F.paint(F.mpoly(up, blur=2.0), mix(C["lips"], hexc("#000000"), 0.18))
+    dark = mix(hexc("#2c1915"), C["shadow"], 0.2)
+    for side, ex in ((-1, fx - EX), (1, fx + EX)):
+        inner = ex - side * 30
+        outer = ex + side * 38
+        bpts = [(inner, ey - 31), (ex - side * 4, ey - 39), (outer, ey - 34)]   # straight, close to the eye
+        F.paint(F.mline(bpts, 11, 4, blur=2.2), mix(brow, C["skin"], 0.2), 0.9)
         if eyes == "closed":
-            F.shade(F.mell((ex, ey - 6), (40, 16), blur=6), C["shadow"], 0.55)
-            lid = [(ex - 36, ey - 2), (ex - 12, ey + 8), (ex + 14, ey + 9), (ex + 36, ey + 1)]
-            F.paint(F.mline(lid, 5, 6, blur=2.4), dark, 0.75)
-            F.paint(F.mline([(ex - 26, ey + 14), (ex, ey + 18), (ex + 26, ey + 14)], 6, 4, blur=4), hexc("#f6e6d8"), 0.3)
+            lid = [(ex - 30, ey - 1), (ex - 10, ey + 7), (ex + 12, ey + 8), (ex + 30, ey)]
+            F.paint(F.mline(lid, 5, 6, blur=2.2), dark, 0.75)
         else:
-            al = [(ex - 38, ey + 2), (ex - 10, ey - 13), (ex + 14, ey - 13), (ex + 38, ey), (ex + 12, ey + 11),
-                  (ex - 14, ey + 11)]
-            am = F.mpoly(al, blur=1.6)
+            am = F.mpoly(AL(ex), blur=1.4)
             iy = ey - (1 if eyes == "open" else -4)
-            F.paint(F.mell((ex + turn * 10, iy), (16, 16), blur=1.6) * am, C["iris"])
-            F.paint(F.mell((ex + turn * 10, iy), (7, 7), blur=1.4) * am, hexc("#1a0f0b"))
-            F.paint(F.mell((ex + turn * 10 - 6, iy - 5), (3, 3), blur=1.2) * am, hexc("#f4ece4"), 0.8)
-            lid_y = -13 if eyes == "open" else -2
-            top = [(ex - 40, ey + 3), (ex - 10, ey + lid_y), (ex + 14, ey + lid_y), (ex + 40, ey)]
+            F.paint(F.mell((ex + turn * 8, iy), (14, 14), blur=1.4) * am, C["iris"])
+            F.paint(F.mell((ex + turn * 8, iy), (6, 6), blur=1.2) * am, hexc("#140b08"))
+            F.paint(F.mell((ex + turn * 8 - 5, iy - 5), (3, 3), blur=1.0) * am, hexc("#f4ece4"), 0.8)
+            lid_y = -11 if eyes == "open" else -2
+            top = [(ex - 33, ey + 3), (ex - 10, ey + lid_y), (ex + 12, ey + lid_y), (ex + 33, ey)]
             if eyes == "down":
-                F.paint(F.mpoly(top + [(ex + 14, ey - 16), (ex - 10, ey - 16)], blur=2), C["skin"])
-            F.paint(F.mline(top, 6, 7, blur=2.2), dark, 0.85)
-            F.shade(F.mline([(ex - 34, ey - 20), (ex, ey - 27), (ex + 34, ey - 18)], 12, 8, blur=5), C["shadow"], 0.55)
-            F.paint(F.mline([(ex - 30, ey + 15), (ex, ey + 19), (ex + 30, ey + 14)], 6, 4, blur=3.5), hexc("#f2e2d4"), 0.35)
+                F.paint(F.mpoly(top + [(ex + 12, ey - 14), (ex - 10, ey - 14)], blur=2), C["skin"])
+            F.paint(F.mline(top, 6, 7, blur=2.0), dark, 0.9)
+            F.shade(F.mline([(ex - 30, ey - 17), (ex, ey - 22), (ex + 30, ey - 15)], 5, 4, blur=2.5), C["shadow"], 0.7)
+            F.paint(F.mline([(ex - 26, ey + 11), (ex, ey + 14), (ex + 26, ey + 10)], 4, 3, blur=2.5), C["shadow"], 0.35)
     for sgn in (-1, 1):
-        F.paint(F.mell((fx + sgn * 15, ey + 104), (9, 5), ang=-sgn * 20, blur=3.5), C["shadow"] * 0.7, 0.7)
-    F.paint(F.mline([(fx - 46, my + 1), (fx - 20, my + 4), (fx, my + 2), (fx + 20, my + 4), (fx + 46, my + 1)],
-                    4, 3, blur=2.6), mix(C["lips"], hexc("#2a0c08"), 0.4), 0.8)
-    F.paint(F.mell((fx + 6, my + 13), (18, 5), blur=4), hexc("#f6d8cc"), 0.4)
+        F.paint(F.mell((fx + sgn * 11, ey + 110), (6, 4), ang=-sgn * 20, blur=2.5), C["shadow"] * 0.6, 0.75)
+    F.paint(F.mline([(fx - 32, my + 1), (fx - 14, my + 3), (fx, my + 2), (fx + 14, my + 3), (fx + 32, my + 1)],
+                    3, 2, blur=2.0), mix(C["lips"], hexc("#2a0c08"), 0.45), 0.8)
+    F.paint(F.mell((fx + 4, my + 10), (13, 4), blur=3), hexc("#f6d8cc"), 0.4)
 
     # ---------------- front hair ----------------
     FH = Layer(PW, PH)
@@ -310,7 +319,7 @@ def draw_portrait(spec):
         painterize(FH, seed + 4, passes=((2500, 36, 5, 11), (3500, 18, 3, 6)), angle=hair_ang,
                    angle_noise=0.14, jitter=0.12, highlight=0.06, hl_col=C["hair_hi"])
         rngh = np.random.default_rng(seed + 11)
-        for _ in range(14):  # glossy strands
+        for _ in range(0):  # glossy strands (off: they fanned out at the crown)
             a0 = rngh.uniform(math.pi * 1.1, math.pi * 1.9)
             r0 = rngh.uniform(90, 170)
             pts = [(CX + math.cos(a0) * r0 * k / 2, CY - 300 + lift + 60 + math.sin(a0 + 0.5) * 0 + k * 45) for k in range(3)]
