@@ -16,7 +16,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 from paint import hexc, mix, canvas_texture, Layer
 from portraits import draw_portrait, PW, PH
-from content import DECADES, INTRO_PORTRAIT, OUTRO_LINES
+from content import (DECADES, INTRO_PORTRAIT, OUTRO_LINES, INTRO_TEXT, INTRO_BG, OUTRO_BG, HIGHLIGHTS as HL,
+                     DOODLES)
 import assets as A
 from timing import (W, H, FPS, BEAT, INTRO, DEC, OUTRO, TOTAL, T_OUT, TR, N_DEC, CARD_IN, NAME_IN, WHO_IN,
                     TYPE_IN, TYPE_DUR, LINE_IN, LINE_DUR, boundaries)
@@ -26,9 +27,6 @@ CACHE = os.environ.get("WIL_CACHE", os.path.join(HERE, "build"))
 INK = hexc("#2a1612")
 CREAM = hexc("#fbf0dc")
 RED = hexc("#b23a2a")
-HL = ["#f3c14f", "#f6c76a", "#f2a29a", "#f2a06a", "#f08a7a", "#f6b08f", "#f3a04e", "#f2c14e", "#f2878a", "#f7c2a0"]
-INTRO_BG = "#e8c23a"
-OUTRO_BG = "#f0cf8e"
 
 
 # =========================================================================== helpers
@@ -282,20 +280,19 @@ def build_text():
     T["count"] = {c: Text(f"{i + 1:02d} / 10", font("sans", 30, 800), INK if DECADES[i]["ink"] == "dark" else CREAM,
                           tracking=2) for i, c in enumerate(range(10))}
     # intro
-    T["t100"] = {str(n): Text(str(n), font("serif", 250, 900), INK) for n in range(0, 101)}
-    T["years"] = Text("YEARS", font("sans", 110, 900), INK)
-    T["of"] = Text("of women in", font("serif_i", 84, 500), INK)
-    T["west"] = Text("Western fiction", font("serif_i", 96, 900), INK)
-    T["sub"] = Text("ONE ARCHETYPE PER DECADE  ·  1900–1999", font("sans", 30, 700), RED, tracking=3)
+    T["t100"] = {str(n): Text(str(n), font("serif", 250, 900), INK) for n in range(0, INTRO_TEXT["number"] + 1)}
+    T["years"] = Text(INTRO_TEXT["word"], font("sans", 110, 900), INK)
+    T["of"] = Text(INTRO_TEXT["line1"], font("serif_i", 84, 500), INK)
+    T["west"] = Text(INTRO_TEXT["line2"], font("serif_i", 96, 900), INK)
+    T["sub"] = Text(INTRO_TEXT["sub"], font("sans", 30, 700), RED, tracking=3)
     # outro
     T["o1"] = Text(OUTRO_LINES[0], font("serif", 86, 900), INK)
     T["o2"] = Text(OUTRO_LINES[1], font("serif_i", 56, 500), INK)
     T["o3"] = Text(OUTRO_LINES[2], font("serif_i", 62, 500), INK)
     T["o4"] = Text(OUTRO_LINES[3], font("serif_i", 76, 900), INK)
     # 1990s doodles
-    T["doodles"] = [Text(s, font("hand", sz, 700), c) for s, sz, c in
-                    (("Dear Diary,", 74, RED), ("Day 1.", 64, INK), ("new me!!", 60, RED), ("xoxo", 64, RED),
-                     ("v.g.", 70, INK), ("!!!", 74, INK))]
+    T["doodles"] = [Text(s, font("hand", (74, 64, 60, 64, 70, 74)[k % 6], 700), (RED, INK)[k % 2])
+                    for k, s in enumerate(DOODLES[:6])]
     return T
 
 
@@ -442,7 +439,7 @@ def props_back(fr, i, lt, z):
     elif kind == "blossom":
         for spr, x, ax, sgn in ((X["branchL"], 0, 0.12, 1), (X["branchR"], W, 0.88, -1)):
             p = ease_out(prog(lt, 0.15, 0.9))
-            zblit(fr, spr, x + sgn * (1 - p) * -300, 360, z, anchor=(ax, 0.16),
+            zblit(fr, spr, x + sgn * (1 - p) * -300, 470, z, anchor=(ax, 0.16),
                   rot=sgn * (1.5 * math.sin(lt * 1.1)))
     elif kind == "wallpaper":
         p = ease_back(prog(lt, 0.3, 0.6))
@@ -504,7 +501,6 @@ def props_front(fr, i, lt, z):
             x = x0 + 50 * math.sin(lt * 1.4 + k)
             zblit(fr, X["petal"], x, y, z, rot=lt * 90 + k * 40, scale=rng.uniform(0.7, 1.3))
     elif kind == "noir":
-        draw_smoke(fr, lt)
         draw_blinds(fr, lt)
     elif kind == "fire":
         rng = np.random.default_rng(9)
@@ -604,11 +600,11 @@ def scene_intro(lt):
     zblit(fr, X["ports"][0], 540, 1940 + dy, z, scale=1.08 * sc, rot=rot, anchor=(0.5, 1.0))
     # title
     cp = ease_io(prog(lt, 0.25, 1.1))
-    n = int(round(100 * cp))
+    n = int(round(INTRO_TEXT["number"] * cp))
     t100 = TEXT["t100"][str(n)]
     a0 = ease_out(prog(lt, 0.1, 0.3))
     t100.draw(fr, 70, 120 + (1 - a0) * 60, alpha=a0)
-    t100f = TEXT["t100"]["100"]
+    t100f = TEXT["t100"][str(INTRO_TEXT["number"])]
     yp = ease_back(prog(lt, 0.9, 0.45), 2)
     if yp > 0:
         TEXT["years"].draw(fr, 70 + t100f.w + 26, 250 - (1 - yp) * 40, alpha=clamp(yp), scale=1)
@@ -718,7 +714,10 @@ def main():
     ap.add_argument("--out", default=os.path.join(HERE, "women_in_western_literature.mp4"))
     ap.add_argument("--audio", default=os.path.join(HERE, "build", "score.wav"))
     ap.add_argument("--frames", default=None, help="start,end frame range (debug)")
+    ap.add_argument("--fresh", action="store_true", help="rebuild cached portraits/backgrounds (after editing looks)")
     args = ap.parse_args()
+    if args.fresh and os.path.exists(os.path.join(CACHE, "assets.pkl")):
+        os.remove(os.path.join(CACHE, "assets.pkl"))
     init_globals()
     if args.preview:
         outdir = os.environ.get("WIL_PREVIEW", os.path.join(HERE, "build", "preview"))

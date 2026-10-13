@@ -203,28 +203,27 @@ def build():
         t0 = b * BAR
         root, tones = chords[b % 4]
         in_outro = t0 >= T_OUT
-        drums = (INTRO - 0.01) <= t0 < T_OUT
+        drums = False  # v2: ambient piano only, no groove
+        in_dec = (INTRO - 0.01) <= t0 < T_OUT
         last = b == n_bars - 1
-        place(music, pad([root + 12] + tones[:3], BAR * (2 if last else 1)), t0, 0.5)
-        place(music, bass(root - 12 if root > 47 else root, BEAT * 1.6), t0, 0.55)
-        if not last:
-            place(music, bass(root - 12 if root > 47 else root, BEAT * 0.8), t0 + BEAT * 2.5, 0.35)
+        place(music, pad([root + 12] + tones[:3], BAR * (2 if last else 1)), t0, 0.75)
+        place(music, lp(bass(root - 12 if root > 47 else root, BEAT * 3.0), 400), t0, 0.35)
         # arpeggio in 8ths (up-down), sparse in intro & outro
         pattern = [0, 2, 1, 3, 2, 4, 3, 1]
         for k in range(8):
             if last and k > 0:
                 break
-            if (b < 1 or in_outro) and k % 2:
+            if k % 2:  # quarter notes only: calmer
                 continue
             m = tones[pattern[k]] + (12 if k in (5,) else 0)
-            vel = 0.42 if k % 2 == 0 else 0.3
+            vel = 0.3
             place(music, piano(m, BEAT * 0.9, vel), t0 + k * BEAT / 2 + rng.normal(0, 0.004), 0.55,
                   pan=-0.25 + 0.5 * (k / 7))
         # melody: one note per half bar over the decades
-        if drums or in_outro:
-            for h in range(2):
+        if in_dec or in_outro:
+            for h in range(1 if b % 2 else 2):
                 m = melody_notes[(b * 2 + h) % len(melody_notes)]
-                place(music, piano(m, BEAT * 1.8, 0.55), t0 + h * 2 * BEAT + 0.01, 0.42, pan=0.1)
+                place(music, piano(m, BEAT * 2.5, 0.38), t0 + h * 2 * BEAT + 0.01, 0.34, pan=0.1)
         if drums:
             for k in range(4):
                 if k in (0, 2):
@@ -241,17 +240,15 @@ def build():
     # ---- foley
     B = boundaries()
     for k, b in enumerate(B[1:], 1):
-        place(fx, whoosh(0.75), b - 0.2, 0.55, pan=-0.3 + 0.6 * (k % 2))
+        place(fx, whoosh(1.1, 200, 1500), b - 0.3, 0.45, pan=-0.3 + 0.6 * (k % 2))
     # intro
     for d in (0.25, 0.35, 0.45, 0.55, 0.6, 0.7):
         place(fx, pop(), d + 0.25, 0.25, pan=rng.uniform(-0.6, 0.6))
-    for j in range(16):
-        place(fx, tick(), 0.25 + 1.1 * (j / 16) ** 0.8, 0.5)
-    place(fx, kick(), 0.92, 0.5)
+    place(fx, chime(84, 0.2), 0.9, 0.5)
     place(fx, paper_slide(), 1.25, 0.35)
     place(fx, scribble(0.45), 1.7, 0.6)
-    for j in range(22):
-        place(fx, type_click(), 2.2 + j * 0.036, 0.35, pan=0.2)
+    for j in range(3):
+        place(fx, lp(type_click(), 1800), 2.2 + j * 0.25, 0.25, pan=0.2)
     # decades
     for i in range(N_DEC):
         b = B[i + 1]
@@ -261,10 +258,8 @@ def build():
         place(fx, pop(), b + NAME_IN + 0.05, 0.45)
         d = DECADES[i]
         nchars = len(d["book"]) + len(d["author"]) + 8
-        n_clicks = min(26, nchars)
-        for j in range(n_clicks):
-            place(fx, type_click(), b + TYPE_IN + TYPE_DUR * 0.95 * j / n_clicks + rng.normal(0, 0.004), 0.3,
-                  pan=rng.uniform(-0.2, 0.3))
+        for j in range(3):  # a few soft taps instead of a typewriter burst
+            place(fx, lp(type_click(), 1800), b + TYPE_IN + TYPE_DUR * j / 3, 0.25, pan=rng.uniform(-0.2, 0.3))
         n_lines = 1 if len(d["line"]) < 34 else 2
         for k in range(n_lines):
             place(fx, scribble(LINE_DUR * 0.9), b + LINE_IN + k * LINE_DUR * 0.8, 0.7, pan=-0.15)
@@ -290,17 +285,17 @@ def build():
 
     vinyl = (rng.random(N) < 0.0004) * rng.normal(0, 1, N)
     vinyl = hp(vinyl, 1500) * 0.4 + lp(rng.normal(0, 1, N), 300) * 0.004
-    music[:, 0] += vinyl
-    music[:, 1] += np.roll(vinyl, 37)
 
-    music = reverb(music, wet=0.26)
+    music = reverb(music, secs=3.5, wet=0.35)
     fx = reverb(fx, secs=1.2, wet=0.12)
-    mix = music * 0.85 + fx * 0.9
+    fx = lp(fx, 4500)
+    mix = music * 0.9 + fx * 0.3
+    mix = lp(mix, 5000)
     t = np.arange(N) / SR
     fade = np.clip((TOTAL - t) / 1.4, 0, 1) ** 1.5
     mix *= fade[:, None] * np.clip(t / 0.05, 0, 1)[:, None]
     mix = mix[: int(TOTAL * SR)]
-    mix = np.tanh(mix / np.abs(mix).max() * 1.3) / np.tanh(1.3) * 0.89
+    mix = mix / np.abs(mix).max() * 0.7  # about -3 dBFS peak, no saturation
     return mix
 
 

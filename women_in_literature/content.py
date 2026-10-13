@@ -1,7 +1,31 @@
-"""Script content: one archetype per decade, 1900-1999."""
+"""THE TEMPLATE: everything you can see or read in the video is set in this file.
 
+Edit the values below, then re-render (see TEMPLATE.md). Field reference and every
+allowed option are in TEMPLATE.md.
+"""
+
+# ---------------------------------------------------------------- intro title card
+INTRO_TEXT = dict(
+    number=100,                       # the big counter rolls 0 -> number
+    word="YEARS",
+    line1="of women in",
+    line2="Western fiction",          # gets the highlighter swipe
+    sub="ONE ARCHETYPE PER DECADE  ·  1900–1999",
+)
+INTRO_BG = "#e8c23a"
+OUTRO_BG = "#f0cf8e"
+
+# highlighter colour behind each archetype name (one per decade, in order)
+HIGHLIGHTS = ["#f3c14f", "#f6c76a", "#f2a29a", "#f2a06a", "#f08a7a", "#f6b08f", "#f3a04e", "#f2c14e", "#f2878a",
+              "#f7c2a0"]
+
+# scribbles that pop up around the head in the "diary" props scene
+DOODLES = ["Dear Diary,", "Day 1.", "new me!!", "xoxo", "v.g.", "!!!"]
+
+# ---------------------------------------------------------------- intro portrait
 INTRO_PORTRAIT = dict(hair_style="bob", cloth_pattern="flowers", tilt=-16, eyes="open", seed=11)
 
+# ---------------------------------------------------------------- one entry per scene, in order
 DECADES = [
     dict(year="1900s", arche="THE ORNAMENT", who="Lily Bart", book="The House of Mirth",
          author="Edith Wharton", pub="1905", line="Raised to be admired, and to marry well.",
@@ -62,4 +86,5 @@ DECADES = [
                        cloth="#9c3a24", cloth_hi="#c0573a", acc=("clip",), turn=0.1, tilt=4, seed=111)),
 ]
 
+# ---------------------------------------------------------------- closing lines (4 lines, last one highlighted)
 OUTRO_LINES = ["Ten decades.", "Ten roles she was written into.", "By the end,", "she was holding the pen."]

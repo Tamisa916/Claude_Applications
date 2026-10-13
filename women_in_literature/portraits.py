@@ -16,6 +16,22 @@ DEFAULT = dict(
 )
 
 
+SHOULDER = 0.72   # 1.0 = original width; lower = narrower shoulders
+
+
+def _narrow(pts, k=SHOULDER, core=80):
+    """Pull body points toward the centre line (keeps the neck, narrows and slopes the shoulders)."""
+    out = []
+    for x, y in pts:
+        d = x - CX
+        if abs(d) > core:
+            ex = abs(d) - core
+            x = CX + math.copysign(core + ex * k, d)
+            y = y + ex * 0.10
+        out.append((x, y))
+    return out
+
+
 def _p(pts, dx=0, dy=0):
     return [(CX + x + dx, CY + y + dy) for x, y in pts]
 
@@ -153,6 +169,7 @@ def draw_portrait(spec):
     torso = [(CX - 74, CY + 300), (CX - 210, CY + 395), (CX - 370, CY + 470), (CX - 445, CY + 620),
              (CX - 470, PH + 40), (CX + 470, PH + 40), (CX + 445, CY + 620), (CX + 370, CY + 470),
              (CX + 210, CY + 395), (CX + 74, CY + 300)]
+    torso = _narrow(torso)
     B.paint(B.mpoly(torso, blur=2), C["skin"])
     B.shade(B.mell((CX + 30, CY + 205 + lift), (120, 70), blur=26), C["shadow"], 0.75)
     B.shade(B.mpoly([(CX + 20, CY + 120), (CX + 80, CY + 120), (CX + 90, CY + 360), (CX + 30, CY + 360)],
@@ -181,12 +198,15 @@ def draw_portrait(spec):
     else:  # strapless / off shoulder
         cloth = [(CX - 480, CY + 620), (CX - 300, CY + 600), (CX, CY + 640), (CX + 300, CY + 600),
                  (CX + 480, CY + 620), (CX + 480, PH + 40), (CX - 480, PH + 40)]
-    cm = B.mpoly(cloth, smooth=(nl not in ("v",)), blur=1.5)
-    B.paint(cm, C["cloth"])
+    cloth = _narrow(cloth)
+    cloth = [(CX + (px - CX) * 1.07, py) if py > CY + 540 else (px, py) for px, py in cloth]  # hem covers body
+    BC = Layer(PW, PH)  # clothing on its own layer so its edge stays clean
+    cm = BC.mpoly(cloth, smooth=(nl not in ("v",)), blur=1.5)
+    BC.paint(cm, C["cloth"])
     rng = np.random.default_rng(seed + 7)
     for i in range(7):  # folds
         x0 = CX - 420 + i * 140 + rng.uniform(-30, 30)
-        B.shade(B.mline([(x0, PH), (x0 + rng.uniform(-40, 40), CY + 620), (x0 + rng.uniform(-60, 60), CY + 480)],
+        BC.shade(BC.mline([(x0, PH), (x0 + rng.uniform(-40, 40), CY + 620), (x0 + rng.uniform(-60, 60), CY + 480)],
                         18, 6, blur=10) * cm, C["cloth_hi"], 0.5)
     pat = s["cloth_pattern"]
     if pat == "flowers":  # loose painted blossoms on the dress, like the reference
@@ -195,34 +215,34 @@ def draw_portrait(spec):
                             (CX + 300, CY + 560, "#f0b1a5")]:
             for k in range(6):
                 a = k / 6 * math.tau
-                B.paint(B.mell((x + 18 * math.cos(a), y + 18 * math.sin(a)), (16, 12), a * 57, blur=1.5) * cm,
+                BC.paint(BC.mell((x + 18 * math.cos(a), y + 18 * math.sin(a)), (16, 12), a * 57, blur=1.5) * cm,
                         hexc(col))
-            B.paint(B.mell((x, y), (8, 8), blur=1) * cm, hexc("#e8c46a"))
+            BC.paint(BC.mell((x, y), (8, 8), blur=1) * cm, hexc("#e8c46a"))
     elif pat == "dots":
         for yy in range(int(CY + 440), PH, 46):
             for xx in range(30, PW, 46):
-                B.paint(B.mell((xx + (yy // 46 % 2) * 23, yy), (7, 7), blur=1) * cm, C["cloth_hi"])
+                BC.paint(BC.mell((xx + (yy // 46 % 2) * 23, yy), (7, 7), blur=1) * cm, C["cloth_hi"])
     elif pat == "stripes":
         for xx in range(-200, PW + 200, 70):
-            B.paint(B.mline([(xx, PH), (xx + 220, CY + 400)], 22, 22, blur=1) * cm, C["cloth_hi"])
+            BC.paint(BC.mline([(xx, PH), (xx + 220, CY + 400)], 22, 22, blur=1) * cm, C["cloth_hi"])
     if "lace" in s["acc"]:
-        B.paint(B.mpoly([(CX - 95, CY + 230), (CX + 95, CY + 230), (CX + 105, CY + 340), (CX - 105, CY + 340)],
+        BC.paint(BC.mpoly([(CX - 95, CY + 230), (CX + 95, CY + 230), (CX + 105, CY + 340), (CX - 105, CY + 340)],
                         blur=1), hexc("#f6ead6"))
         for i in range(9):
-            B.paint(B.mell((CX - 100 + i * 25, CY + 340), (14, 10), blur=1), hexc("#f6ead6"))
+            BC.paint(BC.mell((CX - 100 + i * 25, CY + 340), (14, 10), blur=1), hexc("#f6ead6"))
     if "collar" in s["acc"]:
         for sgn in (-1, 1):
-            B.paint(B.mpoly([(CX, CY + 515), (CX + sgn * 175, CY + 410), (CX + sgn * 200, CY + 470),
+            BC.paint(BC.mpoly([(CX, CY + 515), (CX + sgn * 175, CY + 410), (CX + sgn * 200, CY + 470),
                              (CX + sgn * 60, CY + 560)], blur=1), hexc("#fbf3e6"))
     if "cloak" in s["acc"]:
-        B.shade(B.mpoly([(CX - 480, CY + 470), (CX - 120, CY + 300), (CX + 120, CY + 300), (CX + 480, CY + 470),
+        BC.shade(BC.mpoly([(CX - 480, CY + 470), (CX - 120, CY + 300), (CX + 120, CY + 300), (CX + 480, CY + 470),
                          (CX + 480, PH), (CX - 480, PH)], blur=4), C["cloth"], 1.0)
     bang = flow_field(PW, PH, seed + 9, base=1.35, amp=0.5)
-    yy0, xx0 = np.mgrid[0:PH, 0:PW].astype(np.float32)
-    skin_zone = (yy0 < CY + 420) & (np.abs(xx0 - CX) < 120)
-    bang = np.where(skin_zone, np.pi / 2 + 0.25 * np.sign(xx0 - CX), bang).astype(np.float32)
-    painterize(B, seed + 2, passes=((2600, 60, 10, 18), (2400, 34, 6, 10)), angle=bang, angle_noise=0.25,
-               highlight=0.0, soft=0.3)
+    painterize(B, seed + 2, passes=((3500, 22, 5, 9), (5000, 12, 3, 6)), jitter=0.025, hue=0.006,
+               angle_noise=0.3, edge_fuzz=False, highlight=0.0, soft=0.3)
+    painterize(BC, seed + 12, passes=((2600, 60, 10, 18), (2400, 34, 6, 10)), angle=bang, angle_noise=0.25,
+               edge_fuzz=False, highlight=0.0, soft=0.3)
+    B.over(BC)
     if "pearls" in s["acc"]:
         for i in range(23):
             t = i / 22
