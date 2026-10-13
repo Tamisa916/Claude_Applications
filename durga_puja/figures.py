@@ -47,10 +47,10 @@ class Fig:
         return self.L.shape(self.P(pts, dy), _c(fill), lw=self.lw if lw is None else lw, smooth=smooth,
                             pattern=pattern)
 
-    def ell(self, c, ax, fill, ang=0, dy=0, lw=None, pattern=None):
+    def ell(self, c, ax, fill, ang=0, dy=0, lw=None, pattern=None, ink=INK):
         (cx, cy), = self.P([c], dy)
         return self.L.ellipse((cx, cy), (ax[0] * self.k, ax[1] * self.k), _c(fill), lw=self.lw if lw is None else lw,
-                              ang=ang, pattern=pattern)
+                              ang=ang, pattern=pattern, ink=ink)
 
     def limb(self, pts, w, col, dy=0):
         P = self.P(pts, dy)
@@ -143,6 +143,12 @@ def arms(F, s, sleeve, dy=0):
         else:
             pts = [sh, (sg * 46, -310), (sg * 40, -238)]
         F.limb(pts, 13, skin, dy=dy)
+        if s.get("bangles"):
+            bx = pts[1][0] + (pts[2][0] - pts[1][0]) * 0.8
+            by = pts[1][1] + (pts[2][1] - pts[1][1]) * 0.8
+            F.ell((bx, by), (7.5, 7.5), "#c8281e", dy=dy, lw=max(1, F.lw * 0.5))     # shakha-pola
+            F.ell((bx + (pts[2][0] - bx) * 0.4, by + (pts[2][1] - by) * 0.4), (7, 7), "#fbf8f2", dy=dy,
+                  lw=max(1, F.lw * 0.5))
         F.ell(pts[-1], (6.5, 6.5), skin, dy=dy)
         if sleeve is not None:
             F.limb([sh, ((sh[0] + pts[1][0]) / 2, (sh[1] + pts[1][1]) / 2)], 18, sleeve, dy=dy)
@@ -174,6 +180,8 @@ def props_in_hands(F, s, dy=0):
 
 # ------------------------------------------------------------------------------------------- bodies
 def woman(F, s, dy=0, seated=False):
+    s = dict(s)
+    s.setdefault("bangles", True)
     base = s.get("saree", "#f4ece0")
     border = s.get("border", "#c8281e")
     pat = _pattern(s.get("pattern"), s.get("pat_col", border), F.k)
@@ -195,7 +203,14 @@ def woman(F, s, dy=0, seated=False):
     # pallu: diagonal drape over the left shoulder with border
     F.shape([(-38, -392), (-14, -394), (36, -318), (38, -270), (14, -300)], base, pattern=pat, dy=dy)
     F.shape([(-14, -394), (-4, -394), (38, -296), (36, -280)], border, dy=dy)
+    F.L.arc((F.ox, F.oy + (-384 + dy) * F.k), (14 * F.k, 10 * F.k), 10, 170, w=max(1.5, 2.6 * F.k),
+            col=hexc("#e7b23a"))                                         # necklace
     head(F, s, dy=dy)
+    if s.get("hair", "bun") in ("bun",):
+        for j in range(5):                                              # jasmine gajra round the bun
+            a = j / 4 * math.pi - math.pi / 2
+            F.ell((24 + math.cos(a) * 17, -452 + math.sin(a) * 15), (3.5, 3.5), "#fbf8f2", dy=dy,
+                  lw=max(1, F.lw * 0.4))
     props_in_hands(F, s, dy=dy)
 
 

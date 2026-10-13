@@ -81,33 +81,6 @@ def caption_card(ts, font, cap):
 LAAL_PAAR = dict(saree="#f6efe2", border="#c8281e", blouse="#c8281e", sindoor=True)
 
 
-def S1_PEOPLE():
-    sk = SKINS
-    return [
-        # (spec, height, x, feet_y, anim, flip)
-        (dict(kind="priest", skin=sk[2], hair="bald"), 230, 1310, 708, "sway", True),
-        (dict(kind="seated_woman", **LAAL_PAAR, skin=sk[1], arms="fold"), 190, 560, 712, None, False),
-        (dict(kind="seated_woman", saree="#f6efe2", border="#3f6fb5", blouse="#f6efe2", hair="grey_bun",
-              hair_col="#d9d4cc", glasses=True, skin=sk[0], arms="fold"), 190, 1390, 712, None, False),
-        (dict(kind="woman", saree="#f2c14e", border="#c8281e", blouse="#2f7a6e", hair="braid", skin=sk[1],
-              pattern="dots", pat_col="#c8281e"), 150, 1520, 712, "clap", False),
-        (dict(kind="dhaki", kurta="#f6f0e2", hair="short", mustache=True, skin=sk[3]), 300, 250, 880, "drum", False),
-        (dict(kind="dhaki", kurta="#f2d27a", hair="short", mustache=True, skin=sk[2]), 300, 1690, 880, "drum", True),
-        (dict(kind="woman", **LAAL_PAAR, skin=sk[0], arms="clap"), 290, 470, 920, "clap", False),
-        (dict(kind="man", kurta="#f6f0e2", hair="short", mustache=True, skin=sk[2], arms="fold"), 300, 640, 935,
-         None, False),
-        (dict(kind="woman", **LAAL_PAAR, skin=sk[2], arms="fold", hair="open"), 290, 1260, 930, None, False),
-        (dict(kind="woman", saree="#e3567e", border="#f2c14e", blouse="#f2c14e", pattern="buti", pat_col="#f8e3a0",
-              skin=sk[1], arms="clap", sindoor=True), 290, 1450, 920, "clap", False),
-        (dict(kind="woman", **LAAL_PAAR, skin=sk[1], arms="clap"), 380, 130, 1150, "clap", False),
-        (dict(kind="man", kurta="#c8d8ec", pattern="checks", pat_col="#3f6fb5", hair="short", skin=sk[3]), 330,
-         900, 1150, None, False),
-        (dict(kind="woman", saree="#2f7a6e", border="#f2c14e", blouse="#f2c14e", pattern="dots",
-              pat_col="#f6efe2", skin=sk[2], hair="braid"), 200, 1060, 1085, "clap", False),
-        (dict(kind="woman", **LAAL_PAAR, skin=sk[3], arms="fold"), 380, 1790, 1150, None, False),
-    ]
-
-
 SAREES_1975 = [("#f6efe2", "#c8281e", None, None), ("#f6efe2", "#c8281e", None, None),
                ("#f6efe2", "#2f7a6e", None, None), ("#e3567e", "#f2c14e", "buti", "#f8e3a0"),
                ("#2f7a6e", "#f2c14e", "dots", "#f6efe2"), ("#f2c14e", "#c8281e", "dots", "#c8281e"),
@@ -140,21 +113,30 @@ def random_person(rng, h, era="1975"):
 
 
 def crowd_1975(rng):
+    sk = SKINS
     out = []
-    # seated / standing rows on the dalan, kept clear of the protima
-    for x in list(np.linspace(40, 560, 6)) + list(np.linspace(1360, 1880, 6)):
-        spec, h = random_person(rng, rng.uniform(170, 200))
-        if rng.random() < 0.4 and spec["kind"] == "woman":
-            spec["kind"] = "seated_woman"
-        out.append((spec, h, x + rng.uniform(-20, 20), 712, spec["arms"] if spec["arms"] == "clap" else None, False))
-    # courtyard: three loose rows, bigger as they come forward
-    for y, n, h0 in ((820, 9, 250), (960, 9, 300), (1110, 8, 370)):
-        xs = np.linspace(60, 1860, n) + rng.uniform(-55, 55, n)
+    # on the dalan: the priest with the aarti lamp and a seated devotee
+    out.append((dict(kind="priest", skin=sk[2], hair="bald"), 230, 300, 1166, "sway", False))
+    out.append((dict(kind="seated_woman", **LAAL_PAAR, skin=sk[1], arms="fold"), 200, 780, 1168, None, False))
+    # dhakis and dhunuchi dancers in the courtyard
+    out.append((dict(kind="dhaki", kurta="#f6f0e2", hair="short", mustache=True, skin=sk[3]), 330, 150, 1330,
+                "drum", False))
+    out.append((dict(kind="dhaki", kurta="#f2d27a", hair="short", mustache=True, skin=sk[2]), 330, 930, 1330,
+                "drum", True))
+    for x, y, sp in ((420, 1420, dict(saree="#e3567e", border="#f2c14e", blouse="#2f7a6e", pattern="buti",
+                                      pat_col="#f8e3a0")),
+                     (680, 1440, dict(**LAAL_PAAR))):
+        out.append((dict(kind="woman", arms="dhunuchi", skin=sk[rng.integers(0, 4)], **sp), 340, x, y, "dhunuchi",
+                    False))
+    # dense rows, bigger toward the viewer (no gaps left on the floor)
+    rows = ((1262, 10, 255), (1360, 9, 290), (1500, 9, 330), (1650, 8, 380), (1810, 8, 430), (1990, 7, 490))
+    for y, n, h0 in rows:
+        xs = np.linspace(-20, W + 20, n) + rng.uniform(-35, 35, n)
         for x in xs:
-            if y < 900 and 760 < x < 1160:
-                continue  # keep the view to the goddess open
             spec, h = random_person(rng, h0 * rng.uniform(0.94, 1.06))
-            out.append((spec, h, x, y + rng.uniform(-20, 20), "clap" if spec["arms"] == "clap" else None,
+            if y < 1450 and 330 < x < 760 and rng.random() < 0.5:
+                continue  # keep a little air around the dancers
+            out.append((spec, h, x, y + rng.uniform(-18, 18), "clap" if spec["arms"] == "clap" else None,
                         rng.random() < 0.5))
     return out
 
@@ -163,10 +145,10 @@ def build_people(people, nphase=8):
     out = []
     for spec, h, x, y, anim, fl in people:
         frames = []
-        for p in range(nphase if anim in ("clap",) else 1):
+        for p in range(nphase if anim in ("clap", "dhunuchi") else 1):
             s = dict(spec)
-            if anim == "clap":
-                s["arms"] = "clap"
+            if anim in ("clap", "dhunuchi"):
+                s["arms"] = anim
                 s["phase"] = p / nphase
             spr = make_figure(s, h)
             frames.append(flip(spr) if fl else spr)
@@ -175,18 +157,21 @@ def build_people(people, nphase=8):
 
 
 def build_scene1():
-    bg = sets.thakur_dalan()
-    gl = Layer(W, H)
-    sets.garland_swag(gl, 60, 1860, 128, sag=70)
-    A = dict(bg=bg.rgba(), garland=gl.rgba())
-    A["halo"] = sets.chalchitra(292)
-    A["durga"] = sets.durga_riding(470)
-    A["lakshmi"] = sets.deity_woman(235, "#f39ab4", "#e7b23a", attr="lotus")
-    A["saraswati"] = sets.deity_woman(235, "#fbf7ee", "#3f6fb5", skin="#f6e7c8", attr="veena")
-    A["ganesh"] = sets.ganesh(210)
-    A["kartik"] = sets.kartik(215)
-    A["lion"] = sets.lion(110)
-    A["people"] = build_people(S1_PEOPLE() + crowd_1975(np.random.default_rng(1975)))
+    bg = sets.thakur_dalan_v()
+    deco = Layer(W, H)
+    sets.garland_swag(deco, 0, W, 136, sag=60)
+    sets.garland_swag(deco, 120, W - 120, 230, sag=90)
+    for x in (110, W - 110):
+        sets.lantern(deco, x, 420, 1.1)
+    sets.chandelier(deco, W / 2, 210)
+    A = dict(bg=bg.rgba(), deco=deco.rgba())
+    A["halo"] = sets.chalchitra(372)
+    A["durga"] = sets.durga_v3(770)
+    A["lakshmi"] = sets.deity_woman(300, "#f39ab4", "#e7b23a", attr="lotus")
+    A["saraswati"] = sets.deity_woman(300, "#fbf7ee", "#3f6fb5", skin="#f6e7c8", attr="veena")
+    A["ganesh"] = sets.ganesh(250)
+    A["kartik"] = sets.kartik(255)
+    A["people"] = build_people(crowd_1975(np.random.default_rng(1975)))
     return A
 
 
@@ -194,8 +179,9 @@ def draw_people(fr, people, t, beat=0.625):
     for p in sorted(people, key=lambda q: q["y"]):
         fs = p["frames"]
         rot = 0.0
-        if p["anim"] == "clap":
-            spr = fs[int((t / beat + p["seed"]) * len(fs)) % len(fs)]
+        if p["anim"] in ("clap", "dhunuchi"):
+            spd = 1.0 if p["anim"] == "clap" else 0.5
+            spr = fs[int((t / beat * spd + p["seed"]) * len(fs)) % len(fs)]
         else:
             spr = fs[0]
         if p["anim"] in ("sway", "drum"):
@@ -205,13 +191,14 @@ def draw_people(fr, people, t, beat=0.625):
 
 def draw_scene1(A, lt):
     fr = A["bg"][..., :3].copy()
-    blit(fr, A["halo"], W / 2, 540, anchor=(0.5, 1.0 - 20 / A["halo"].shape[0]))
+    blit(fr, A["halo"], W / 2, 900, anchor=(0.5, 1.0 - 20 / A["halo"].shape[0]))
+    blit(fr, A["deco"], W / 2, H / 2)
     bob = 3 * math.sin(lt * 1.2)
-    for key, x, y in (("lakshmi", 752, 612), ("saraswati", 1192, 612), ("ganesh", 690, 612), ("kartik", 1236, 612),
-                      ("durga", 958, 612)):
+    blit(fr, A["durga"], W / 2 + 6, 1062 + bob, anchor=(0.5, 1.0))
+    for key, x, y in (("lakshmi", 150, 1168), ("ganesh", 70, 1168), ("saraswati", 930, 1168),
+                      ("kartik", 1012, 1168)):
         spr = A[key]
-        blit(fr, spr, x, y + (bob if key == "durga" else 0), anchor=(0.5, 1.0 - 18 / spr.shape[0]))
-    blit(fr, A["garland"], W / 2, H / 2)
+        blit(fr, spr, x, y, anchor=(0.5, 1.0 - 18 / spr.shape[0]))
     draw_people(fr, A["people"], lt)
     return fr
 
@@ -234,9 +221,9 @@ def draw(A, t):
     lt = t - B[k]
     k = 1  # TODO: other scenes; checkpoint renders scene 1 only
     fr = draw_scene1(A["s1"], lt)
-    fr = camera(fr, 1.0 + 0.04 * clamp(lt / LENGTHS[1]), cy=H * 0.42)
+    fr = camera(fr, 1.0 + 0.035 * clamp(lt / LENGTHS[1]), cy=H * 0.40)
     cap = A["caps"][k]
     if cap is not None:
         p = ease_out(prog(lt, 0.8, 0.8))
-        blit(fr, cap, 48, 44 + (1 - p) * -40, alpha=p, anchor=(0, 0))
+        blit(fr, cap, W / 2, 26 + (1 - p) * -40, alpha=p, anchor=(0.5, 0))
     return fr

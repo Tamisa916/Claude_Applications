@@ -1,5 +1,5 @@
 """Timeline (seconds)."""
-W, H, FPS = 1920, 1080, 30
+W, H, FPS = 1080, 1920, 30
 BPM = 96
 BEAT = 60.0 / BPM
 # intro, then seven scenes (1975, 1985, 2000s, world, 2020, 2021, today/Bijoya)
