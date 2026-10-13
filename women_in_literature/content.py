@@ -1,0 +1,90 @@
+"""THE TEMPLATE: everything you can see or read in the video is set in this file.
+
+Edit the values below, then re-render (see TEMPLATE.md). Field reference and every
+allowed option are in TEMPLATE.md.
+"""
+
+# ---------------------------------------------------------------- intro title card
+INTRO_TEXT = dict(
+    number=100,                       # the big counter rolls 0 -> number
+    word="YEARS",
+    line1="of women in",
+    line2="Western fiction",          # gets the highlighter swipe
+    sub="ONE ARCHETYPE PER DECADE  ·  1900–1999",
+)
+INTRO_BG = "#e8c23a"
+OUTRO_BG = "#f0cf8e"
+
+# highlighter colour behind each archetype name (one per decade, in order)
+HIGHLIGHTS = ["#f3c14f", "#f6c76a", "#f2a29a", "#f2a06a", "#f08a7a", "#f6b08f", "#f3a04e", "#f2c14e", "#f2878a",
+              "#f7c2a0"]
+
+# scribbles that pop up around the head in the "diary" props scene
+DOODLES = ["Dear Diary,", "Day 1.", "new me!!", "xoxo", "v.g.", "!!!"]
+
+# ---------------------------------------------------------------- intro portrait
+INTRO_PORTRAIT = dict(hair_style="bob", cloth_pattern="flowers", tilt=-16, eyes="open", seed=11)
+
+# ---------------------------------------------------------------- one entry per scene, in order
+DECADES = [
+    dict(year="1900s", arche="THE ORNAMENT", who="Lily Bart", book="The House of Mirth",
+         author="Edith Wharton", pub="1905", line="Raised to be admired, and to marry well.",
+         bg="#e2b33c", ink="dark", props="frame",
+         portrait=dict(hair_style="updo", hair="#5a3424", hair_hi="#a0694a", eyes="open", neckline="high",
+                       cloth="#f1e3cc", cloth_hi="#d8bf9e", acc=("lace", "pearls", "earrings"), tilt=6, seed=21)),
+    dict(year="1910s", arche="THE PIONEER", who="Ántonia Shimerda", book="My Ántonia",
+         author="Willa Cather", pub="1918", line="Strength measured in harvests, not husbands.",
+         bg="#d79a4c", ink="dark", props="wheat",
+         portrait=dict(hair_style="scarf", hair="#4a2a1a", hair_hi="#8a5634", eyes="open", neckline="round",
+                       cloth="#7a4a2c", cloth_hi="#9c6440", skin="#e9bf9f", shadow="#b57d63", acc=("scarf",),
+                       tilt=-4, seed=31)),
+    dict(year="1920s", arche="THE FLAPPER", who="Daisy Buchanan", book="The Great Gatsby",
+         author="F. Scott Fitzgerald", pub="1925", line="\"...a beautiful little fool.\"",
+         bg="#d9827a", ink="dark", props="deco",
+         portrait=dict(hair_style="wave", hair="#2a1c16", hair_hi="#6c5a52", eyes="down", neckline="v",
+                       cloth="#f0c9a8", cloth_hi="#d9a57e", lips="#b8202a", acc=("headband", "pearls"),
+                       tilt=-7, seed=41)),
+    dict(year="1930s", arche="THE SEEKER", who="Janie Crawford", book="Their Eyes Were Watching God",
+         author="Zora Neale Hurston", pub="1937", line="Under a pear tree, she dreams of a life of her own.",
+         bg="#c8613a", ink="light", props="blossom",
+         portrait=dict(hair_style="long", hair="#1c1210", hair_hi="#5a4038", eyes="open", neckline="round",
+                       cloth="#e9b949", cloth_hi="#c9902a", skin="#8a5638", shadow="#5e3622", blush="#a5503a",
+                       lips="#8e3a2e", tilt=-9, seed=51)),
+    dict(year="1940s", arche="THE FEMME FATALE", who="Phyllis Nirdlinger", book="Double Indemnity",
+         author="James M. Cain", pub="1943", line="Desire, money, and a plan.",
+         bg="#6e2029", ink="light", props="noir",
+         portrait=dict(hair_style="victory", hair="#7a3a1e", hair_hi="#c2763f", eyes="open", neckline="v",
+                       cloth="#1f1416", cloth_hi="#4a2c2c", lips="#c0141e", acc=("hat",), turn=0.25,
+                       tilt=5, seed=61)),
+    dict(year="1950s", arche="THE HOUSEWIFE", who="Marjorie Morgenstern", book="Marjorie Morningstar",
+         author="Herman Wouk", pub="1955", line="Dreams of the stage. Ends up in the suburbs.",
+         bg="#f0a47c", ink="dark", props="wallpaper",
+         portrait=dict(hair_style="set", hair="#8a5a2e", hair_hi="#c99358", eyes="open", neckline="round",
+                       cloth="#d44d3c", cloth_hi="#f2e4d0", cloth_pattern="dots", lips="#cc2e33",
+                       acc=("collar", "pearls"), tilt=3, seed=71)),
+    dict(year="1960s", arche="THE MADWOMAN", who="Antoinette Cosway", book="Wide Sargasso Sea",
+         author="Jean Rhys", pub="1966", line="Jane Eyre’s “madwoman in the attic” tells her side.",
+         bg="#d14f2a", ink="light", props="fire",
+         portrait=dict(hair_style="wild", hair="#1e1310", hair_hi="#5c3a2a", eyes="open", neckline="boat",
+                       cloth="#f4e8d6", cloth_hi="#d6c2a6", skin="#e6c2a2", shadow="#b07e62", tilt=-14,
+                       seed=81)),
+    dict(year="1970s", arche="THE LIBERATED", who="Isadora Wing", book="Fear of Flying",
+         author="Erica Jong", pub="1973", line="Wanting freedom, out loud.",
+         bg="#c9862c", ink="dark", props="sunset",
+         portrait=dict(hair_style="curls", hair="#5a2f1a", hair_hi="#a2623a", eyes="open", neckline="v",
+                       cloth="#e86a2a", cloth_hi="#f5b04a", cloth_pattern="stripes", acc=("hoops",), turn=-0.15,
+                       tilt=-5, seed=91)),
+    dict(year="1980s", arche="THE WITNESS", who="Offred", book="The Handmaid’s Tale",
+         author="Margaret Atwood", pub="1985", line="A future where her body belongs to the state.",
+         bg="#a31f24", ink="light", props="handmaids",
+         portrait=dict(hair_style="bonnet", hair="#3a2016", eyes="down", neckline="high", cloth="#b3161d",
+                       cloth_hi="#7a0e12", acc=("bonnet", "cloak"), lips="#b0453c", seed=101)),
+    dict(year="1990s", arche="THE NARRATOR", who="Bridget Jones", book="Bridget Jones’s Diary",
+         author="Helen Fielding", pub="1996", line="Messy, funny, and telling her own story.",
+         bg="#efb39f", ink="dark", props="diary",
+         portrait=dict(hair_style="messy", hair="#6a4026", hair_hi="#b07a4c", eyes="open", neckline="v",
+                       cloth="#9c3a24", cloth_hi="#c0573a", acc=("clip",), turn=0.1, tilt=4, seed=111)),
+]
+
+# ---------------------------------------------------------------- closing lines (4 lines, last one highlighted)
+OUTRO_LINES = ["Ten decades.", "Ten roles she was written into.", "By the end,", "she was holding the pen."]
