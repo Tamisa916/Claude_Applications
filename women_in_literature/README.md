@@ -1,6 +1,8 @@
 # 100 Years of Women in Western Fiction
 
-A 58-second, 9:16 Vox-style explainer: one archetype per decade, 1900–1999. Every frame is drawn in code as painterly brushstrokes, and the music and sound effects are synthesized too.
+An 87-second, 9:16 Vox-style explainer: one archetype per decade, 1900–1999. Every frame is drawn in code in a soft gouache style, over a gentle synthesized piano score.
+
+**To change the text, people, colours or pace, see [TEMPLATE.md](TEMPLATE.md).**
 
 | Decade | Archetype | Character · Book |
 |---|---|---|
