@@ -85,7 +85,7 @@ def S1_PEOPLE():
     sk = SKINS
     return [
         # (spec, height, x, feet_y, anim, flip)
-        (dict(kind="priest", skin=sk[2], hair="bald"), 230, 860, 708, "sway", False),
+        (dict(kind="priest", skin=sk[2], hair="bald"), 230, 1310, 708, "sway", True),
         (dict(kind="seated_woman", **LAAL_PAAR, skin=sk[1], arms="fold"), 190, 560, 712, None, False),
         (dict(kind="seated_woman", saree="#f6efe2", border="#3f6fb5", blouse="#f6efe2", hair="grey_bun",
               hair_col="#d9d4cc", glasses=True, skin=sk[0], arms="fold"), 190, 1390, 712, None, False),
@@ -180,11 +180,11 @@ def build_scene1():
     sets.garland_swag(gl, 60, 1860, 128, sag=70)
     A = dict(bg=bg.rgba(), garland=gl.rgba())
     A["halo"] = sets.chalchitra(292)
-    A["durga"] = sets.durga(370)
-    A["lakshmi"] = sets.deity_woman(255, "#f39ab4", "#e7b23a", attr="lotus")
-    A["saraswati"] = sets.deity_woman(255, "#fbf7ee", "#3f6fb5", skin="#f6e7c8", attr="veena")
-    A["ganesh"] = sets.ganesh(225)
-    A["kartik"] = sets.kartik(230)
+    A["durga"] = sets.durga_riding(470)
+    A["lakshmi"] = sets.deity_woman(235, "#f39ab4", "#e7b23a", attr="lotus")
+    A["saraswati"] = sets.deity_woman(235, "#fbf7ee", "#3f6fb5", skin="#f6e7c8", attr="veena")
+    A["ganesh"] = sets.ganesh(210)
+    A["kartik"] = sets.kartik(215)
     A["lion"] = sets.lion(110)
     A["people"] = build_people(S1_PEOPLE() + crowd_1975(np.random.default_rng(1975)))
     return A
@@ -207,8 +207,8 @@ def draw_scene1(A, lt):
     fr = A["bg"][..., :3].copy()
     blit(fr, A["halo"], W / 2, 540, anchor=(0.5, 1.0 - 20 / A["halo"].shape[0]))
     bob = 3 * math.sin(lt * 1.2)
-    for key, x, y in (("ganesh", 712, 612), ("kartik", 1208, 612), ("lakshmi", 812, 612), ("saraswati", 1108, 612),
-                      ("lion", 890, 612), ("durga", 960, 612)):
+    for key, x, y in (("lakshmi", 752, 612), ("saraswati", 1192, 612), ("ganesh", 690, 612), ("kartik", 1236, 612),
+                      ("durga", 958, 612)):
         spr = A[key]
         blit(fr, spr, x, y + (bob if key == "durga" else 0), anchor=(0.5, 1.0 - 18 / spr.shape[0]))
     blit(fr, A["garland"], W / 2, H / 2)

@@ -214,3 +214,170 @@ def chalchitra(r):
     L.a[int(c[1]):, :] = 0
     L.rgb[int(c[1]):, :] = 0
     return L.rgba()
+
+
+# ----------------------------------------------------------------------------- Durga on the lion (folk style)
+class Canvas(Fig):
+    """Free canvas in design units (origin top-left), scaled to a pixel height."""
+
+    def __init__(self, height, uw=610, uh=640):
+        self.k = height / uh
+        self.W, self.H = int(uw * self.k) + 8, int(uh * self.k) + 8
+        self.ox, self.oy = 4, 4
+        self.L = Layer(self.W, self.H)
+        self.lw = max(1.4, 2.6 * self.k)
+
+
+def _arm(F, sh, hand, skin, elbow_bend=18):
+    mx, my = (sh[0] + hand[0]) / 2, (sh[1] + hand[1]) / 2
+    nx, ny = -(hand[1] - sh[1]), hand[0] - sh[0]
+    n = math.hypot(nx, ny) + 1e-6
+    el = (mx + nx / n * elbow_bend, my + ny / n * elbow_bend)
+    F.limb([sh, el, hand], 13, skin)
+    for t in (0.78, 0.86):  # bangles
+        bx, by = el[0] + (hand[0] - el[0]) * t, el[1] + (hand[1] - el[1]) * t
+        F.ell((bx, by), (7, 7), "#e7b23a", lw=max(1, F.lw * 0.6))
+    F.ell(hand, (8, 8), skin)
+
+
+def durga_riding(height):
+    F = Canvas(height)
+    skin, gold, red, blue = "#f3c98b", "#e7b23a", "#c8281e", "#2f5fa8"
+    # --- halo
+    for k in range(28):
+        a = k / 28 * math.tau
+        F.ell((268 + math.cos(a) * 92, 150 + math.sin(a) * 92), (13, 13), red, lw=max(1, F.lw * 0.7))
+    F.ell((268, 150), (90, 90), gold)
+    F.ell((268, 150), (72, 72), "#f6d77a", lw=max(1, F.lw * 0.5))
+    # --- buffalo with Mahishasura (lower right, behind the lion's head)
+    F.ell((520, 586), (78, 44), "#6b6b70")
+    for x in (470, 560):
+        F.shape([(x - 10, 600), (x + 10, 600), (x + 10, 636), (x - 10, 636)], "#5a5a60")
+    F.shape([(512, 470), (562, 470), (566, 560), (508, 560)], "#8a5536")                          # torso
+    F.limb([(556, 480), (580, 430), (570, 372)], 14, "#8a5536")                                   # raised arm
+    F.shape([(560, 352), (590, 342), (594, 366), (566, 372)], "#d9d4cc")                          # axe head
+    F.ln([(572, 360), (568, 410)], 1.0, "#7a4a2a")
+    F.ell((538, 446), (22, 26), "#8a5536")
+    F.shape([(516, 436), (538, 416), (560, 436), (552, 424), (522, 424)], "#1d1512", smooth=True)
+    F.shape([(524, 456), (538, 451), (552, 456), (538, 460)], "#1d1512", lw=0)                    # moustache
+    F.ell((531, 444), (3, 2.5), INK, lw=0)
+    F.ell((545, 444), (3, 2.5), INK, lw=0)
+    F.ell((468, 582), (30, 26), "#6b6b70")                                                         # buffalo head
+    F.shape([(446, 566), (414, 540), (424, 536), (456, 560)], "#2a2420")                          # horns
+    F.shape([(490, 566), (522, 540), (512, 536), (480, 560)], "#2a2420")
+    F.ell((468, 596), (14, 10), "#8a7f86")
+    for sg in (-1, 1):
+        F.ell((468 + sg * 12, 576), (3.5, 3), "#ffffff", lw=0)
+    # --- lion (striding right), tail attached at the rump
+    F.shape([(92, 470), (60, 420), (44, 340), (58, 300), (70, 320), (64, 360), (80, 420), (108, 462)],
+            "#e9a63a", smooth=True)
+    F.ell((58, 296), (14, 20), "#b5562c")
+    for x in (118, 160):
+        F.shape([(x - 15, 480), (x + 15, 480), (x + 12, 600), (x - 12, 600)], "#e9a63a")
+        F.ell((x + 4, 604), (19, 9), "#e9a63a")
+    F.shape([(86, 470), (140, 430), (290, 424), (370, 440), (392, 486), (372, 535), (310, 548), (140, 548),
+             (90, 520)], "#e9a63a", smooth=True)
+    F.ln([(150, 500), (300, 500)], 0.4, "#c9862a")
+    for x in (330, 368):
+        F.shape([(x - 15, 500), (x + 15, 500), (x + 12, 600), (x - 12, 600)], "#e9a63a")
+        F.ell((x + 6, 604), (19, 9), "#e9a63a")
+    mane = [(396 + math.cos(a) * (62 + 10 * (k % 2)), 418 + math.sin(a) * (66 + 10 * (k % 2)))
+            for k, a in enumerate(np.linspace(0, math.tau, 26, endpoint=False))]
+    F.shape(mane, "#b5562c")
+    for a in np.linspace(0, math.tau, 18, endpoint=False):
+        F.ln([(396 + math.cos(a) * 42, 418 + math.sin(a) * 44), (396 + math.cos(a) * 62, 418 + math.sin(a) * 66)],
+             0.45, "#7a3216")
+    F.ell((404, 422), (40, 40), "#f0b44a")                                                         # face
+    F.ell((432, 444), (24, 18), "#f6cf7a")                                                         # muzzle
+    F.shape([(420, 452), (446, 452), (440, 466), (424, 466)], "#c8281e")                           # open mouth
+    F.shape([(430, 430), (444, 430), (437, 440)], "#5a2a1a")                                       # nose
+    for ex in (392, 420):
+        F.ell((ex, 410), (7, 5), "#ffffff")
+        F.ell((ex + 2, 410), (3, 3.5), INK, lw=0)
+        F.ln([(ex - 8, 400), (ex + 8, 398)], 0.5)
+    # --- Durga: hair, ten arms, body, saree, head
+    F.shape([(222, 150), (230, 120), (306, 120), (314, 150), (322, 300), (300, 340), (236, 340), (214, 300)],
+            "#1d1512", smooth=True)
+    arms = [((236, 262), (138, 96), "trident"), ((236, 266), (112, 158), "chakra"), ((236, 272), (104, 222), "sword"),
+            ((236, 280), (120, 284), "conch"), ((236, 288), (150, 336), "lotus"),
+            ((300, 262), (398, 96), "bow"), ((300, 266), (424, 160), "shield"), ((300, 272), (432, 226), "axe"),
+            ((300, 280), (418, 290), "mace")]
+    for sh, hand, wpn in arms:
+        _arm(F, sh, hand, skin)
+        x, y = hand
+        if wpn == "trident":
+            F.shape([(x - 3, y - 70), (x + 3, y - 70), (x + 3, y + 30), (x - 3, y + 30)], "#d9d4cc")
+            F.ln([(x - 16, y - 92), (x - 14, y - 70), (x + 14, y - 70), (x + 16, y - 92)], 1.0, "#d9d4cc")
+            F.ln([(x, y - 98), (x, y - 70)], 1.0, "#d9d4cc")
+        elif wpn == "chakra":
+            F.ell((x - 2, y - 22), (18, 18), gold)
+            F.ell((x - 2, y - 22), (7, 7), red, lw=1)
+        elif wpn == "sword":
+            F.shape([(x - 4, y), (x + 4, y), (x - 30, y - 80), (x - 36, y - 76)], "#d9d4cc")
+        elif wpn == "conch":
+            F.shape([(x - 22, y - 10), (x + 4, y - 18), (x + 8, y - 4), (x - 18, y + 4)], "#fbf7ee", smooth=True)
+        elif wpn == "lotus":
+            for j in range(5):
+                F.ell((x - 18 + j * 9, y - 18), (6, 15), "#f07a8a", ang=(j - 2) * 18, lw=1)
+        elif wpn == "bow":
+            F.L.arc((F.ox + (x + 6) * F.k, F.oy + y * F.k), (14 * F.k, 64 * F.k), -100, 100, w=max(2, 4 * F.k),
+                    col=hexc("#9a5a2a"))
+        elif wpn == "shield":
+            F.ell((x + 6, y), (26, 26), "#1d1a1a")
+            for a in np.linspace(0, math.tau, 4, endpoint=False):
+                F.ell((x + 6 + math.cos(a) * 12, y + math.sin(a) * 12), (4, 4), gold, lw=1)
+        elif wpn == "axe":
+            F.ln([(x, y + 20), (x + 6, y - 50)], 1.2, "#7a4a2a")
+            F.shape([(x + 2, y - 52), (x + 26, y - 62), (x + 22, y - 32)], "#d9d4cc")
+        elif wpn == "mace":
+            F.ln([(x, y + 10), (x + 10, y - 40)], 1.2, "#7a4a2a")
+            F.ell((x + 12, y - 46), (12, 12), gold)
+    # saree skirt draped over the lion's back, one foot forward
+    F.shape([(232, 330), (304, 330), (330, 400), (352, 470), (300, 486), (200, 492), (168, 470), (196, 400)], red,
+            smooth=False, pattern=_buti_gold(F))
+    F.shape([(168, 466), (200, 488), (300, 482), (352, 466), (356, 480), (302, 500), (198, 506), (164, 482)], gold)
+    for x in (240, 262, 284):
+        F.ln([(x, 340), (x - 20 + (x - 262) * 0.6, 484)], 0.5)
+    F.ell((322, 512), (16, 8), skin)                                                               # foot
+    F.ell((322, 506), (16, 3), "#c8281e", lw=0)                                                    # alta
+    F.shape([(234, 248), (302, 248), (306, 334), (230, 334)], blue)                                # blouse
+    F.shape([(238, 252), (300, 252), (304, 334), (276, 334), (238, 272)], red)                     # pallu
+    F.shape([(238, 252), (252, 252), (300, 326), (288, 334)], gold)
+    for j in range(3):  # necklaces
+        F.L.arc((F.ox + 268 * F.k, F.oy + 246 * F.k), ((24 + j * 9) * F.k, (16 + j * 9) * F.k), 10, 170,
+                w=max(1.5, 3 * F.k), col=hexc(gold))
+    _arm(F, (300, 284), (330, 300), skin, elbow_bend=-10)                                          # spear hand
+    F.shape([(326, 292), (334, 288), (514, 486), (506, 492)], "#d9d4cc")                           # spear
+    F.shape([(506, 486), (522, 482), (520, 504)], "#d9d4cc")
+    F.shape([(256, 214), (280, 214), (282, 250), (254, 250)], skin)                                # neck
+    F.ell((268, 172), (40, 50), skin)                                                               # face
+    F.shape([(228, 150), (240, 126), (268, 118), (296, 126), (308, 150), (290, 138), (268, 134), (246, 138)],
+            "#1d1512", smooth=True)                                                                 # hair line
+    for sg in (-1, 1):  # big fish-shaped eyes, arched brows
+        cx = 268 + sg * 17
+        F.ln([(cx - 13, 154), (cx, 149), (cx + 13, 154)], 0.7, smooth=True)
+        F.shape([(cx - 15, 166), (cx - 4, 159), (cx + 8, 160), (cx + 17, 165), (cx + 6, 171), (cx - 6, 171)],
+                "#fbf7ee", smooth=True, lw=max(1, F.lw * 0.8))
+        F.ell((cx + 3, 165), (5, 5.5), INK, lw=0)
+        F.ln([(cx + sg * 15, 165), (cx + sg * 24, 162)], 0.7)
+    F.ell((268, 147), (3, 7), "#c8281e", lw=max(1, F.lw * 0.5))                                    # third eye
+    F.ln([(268, 170), (270, 188), (264, 190)], 0.5)
+    F.L.arc((F.ox + 276 * F.k, F.oy + 190 * F.k), (7 * F.k, 7 * F.k), -40, 260, w=max(1.5, 2.5 * F.k),
+            col=hexc(gold))                                                                         # nose ring
+    F.shape([(256, 202), (268, 199), (280, 202), (268, 208)], "#c8281e", lw=max(1, F.lw * 0.5))     # lips
+    for sg in (-1, 1):
+        F.ell((268 + sg * 40, 190), (6, 10), gold, lw=max(1, F.lw * 0.6))                          # earrings
+    # crown (mukut)
+    crown = [(222, 136), (228, 96), (246, 90), (254, 60), (268, 36), (282, 60), (290, 90), (308, 96), (314, 136),
+             (268, 124)]
+    F.shape(crown, gold)
+    for x, y in ((246, 112), (268, 92), (290, 112), (268, 64)):
+        F.ell((x, y), (6, 7), "#c8281e", lw=1)
+    for x in range(232, 306, 10):
+        F.ell((x, 130), (3, 3), "#fbf7ee", lw=0)
+    return F.L.rgba()
+
+
+def _buti_gold(F):
+    from flat import pat_buti
+    return pat_buti(hexc("#e7b23a"), None, step=max(8, int(24 * F.k)), r=max(2, 4 * F.k))
