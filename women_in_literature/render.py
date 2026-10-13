@@ -212,7 +212,7 @@ def build_assets():
     X["arcs"] = A.build_arcs()
     X["plane"] = A.build_plane()
     X["handmaid"] = A.build_handmaid()
-    X["card"], X["card_pad"] = A.build_card(940, 600)
+    X["card"], X["card_pad"] = A.build_card(940, 625)
     X["hl"] = []
     X["polaroids"] = []
     for i, d in enumerate(DECADES):
@@ -267,8 +267,8 @@ def build_text():
         e["who"] = Text(d["who"], font("serif_i", 58, 700), INK)
         e["book"] = Text(d["book"], fit_font(d["book"], "serif_i", 42, 400, 840), hexc("#5a2a1e"))
         e["auth"] = Text(f"{d['author'].upper()}  ·  {d['pub']}", font("sans", 28, 600), hexc("#7a4a3a"), tracking=2)
-        hf = font("hand", 56, 700)
-        e["line"] = [Text(s, hf, RED) for s in wrap(d["line"], hf, 840)]
+        hf = font("hand", 74, 700)
+        e["line"] = [Text(s, hf, RED) for s in wrap(d["line"], hf, 860)]
         yf = font("serif", 200, 900)
         e["yink"] = ink
         T["dec"].append(e)
@@ -390,7 +390,7 @@ def draw_card(fr, i, lt):
     p = ease_back(prog(lt, CARD_IN, 0.5), 1.2)
     if p <= 0:
         return
-    cx0, cy0 = 70, 1265 + (1 - p) * 760
+    cx0, cy0 = 70, 1200 + (1 - p) * 820
     rot = -1.2
     card = X["card"]
     pad = X["card_pad"]
@@ -417,7 +417,7 @@ def draw_card(fr, i, lt):
     for k, ln in enumerate(e["line"]):
         lp = prog(lt, LINE_IN + k * LINE_DUR * 0.8, LINE_DUR)
         if lp > 0:
-            ln.draw(fr, lx, cy0 + 398 + k * 62, frac=ease_io(lp))
+            ln.draw(fr, lx, cy0 + 392 + k * 80, frac=ease_io(lp))
 
 
 def portrait_motion(lt, start=0.05):
@@ -440,9 +440,9 @@ def props_back(fr, i, lt, z):
         pulse = 0.65 + 0.35 * math.sin(lt * 4)
         zblit(fr, X["green"], 955, 600, z, alpha=pulse * ease_out(prog(lt, 1.2, 0.6)))
     elif kind == "blossom":
-        for spr, x, ax, sgn in ((X["branchL"], 0, 0.0, 1), (X["branchR"], W, 1.0, -1)):
+        for spr, x, ax, sgn in ((X["branchL"], 0, 0.12, 1), (X["branchR"], W, 0.88, -1)):
             p = ease_out(prog(lt, 0.15, 0.9))
-            zblit(fr, spr, x + sgn * (1 - p) * -300, 360, z, anchor=(ax, 0.05),
+            zblit(fr, spr, x + sgn * (1 - p) * -300, 360, z, anchor=(ax, 0.16),
                   rot=sgn * (1.5 * math.sin(lt * 1.1)))
     elif kind == "wallpaper":
         p = ease_back(prog(lt, 0.3, 0.6))
@@ -634,7 +634,7 @@ def scene_decade(i, lt):
     if d["props"] == "frame":
         zblit(fr, X["cameo"], 540, 1420 + dy, z, scale=0.98 * sc, rot=rot * 2, anchor=(0.5, 0.95))
     else:
-        zblit(fr, X["ports"][i + 1], 540, 1560 + dy, z, scale=sc, rot=rot, anchor=(0.5, 1.0))
+        zblit(fr, X["ports"][i + 1], 540, 1540 + dy, z, scale=1.15 * sc, rot=rot, anchor=(0.5, 1.0))
     props_front(fr, i, lt, z)
     draw_card(fr, i, lt)
     draw_timeline(fr, i, lt, d["ink"])
@@ -708,7 +708,7 @@ def init_globals():
     X = build_assets()
     TEXT = build_text()
     rng = np.random.default_rng(1)
-    GRAIN = [cv2.GaussianBlur(rng.normal(0, 0.018, (H, W)).astype(np.float32), (0, 0), 0.6) for _ in range(6)]
+    GRAIN = [cv2.GaussianBlur(rng.normal(0, 0.032, (H, W)).astype(np.float32), (0, 0), 0.6) for _ in range(6)]
     WIPE = build_wipe()
 
 

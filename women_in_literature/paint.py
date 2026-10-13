@@ -122,9 +122,12 @@ def angle_radial(w, h, cx, cy):
     return np.arctan2(yy - cy, xx - cx)
 
 
+STYLE = "gouache"   # "gouache" (broad flat planes) or "impasto" (v1 short strokes)
+
+
 def painterize(L, seed, passes=((6000, 26, 8, 16), (9000, 14, 4, 9)), jitter=0.035,
                angle=None, angle_noise=0.3, edge_fuzz=True, sample_thresh=0.4, hue=0.008,
-               highlight=0.0, hl_col=None, soft=0.0):
+               highlight=0.0, hl_col=None, soft=0.0, style=None):
     """Repaint a layer with oriented brush strokes sampled from its own colours."""
     rng = np.random.default_rng(seed)
     h, w = L.a.shape
@@ -146,6 +149,9 @@ def painterize(L, seed, passes=((6000, 26, 8, 16), (9000, 14, 4, 9)), jitter=0.0
         ang = np.where(mag > thr, ang, nz)
     else:
         ang = angle
+
+    if (style or STYLE) == "gouache":
+        return _gouache(L, rng, base, a, ang, passes, jitter, angle_noise, edge_fuzz, sample_thresh)
 
     canvas = np.ascontiguousarray((base * 255).astype(np.uint8))
     sa = np.zeros((h, w), np.uint8)
@@ -180,6 +186,55 @@ def painterize(L, seed, passes=((6000, 26, 8, 16), (9000, 14, 4, 9)), jitter=0.0
     if edge_fuzz:
         near = cv2.GaussianBlur((a > 0.05).astype(np.float32), (0, 0), 6) > 0.02
         na = np.maximum(a, sa.astype(np.float32) / 255.0 * near)
+    else:
+        na = a
+    L.rgb = out * na[..., None]
+    L.a = na
+    return L
+
+
+def _gouache(L, rng, base, a, ang, passes, jitter, angle_noise, edge_fuzz, sample_thresh, levels=5):
+    """Gouache: posterised tonal planes, then fewer, broad, flat, square-ended strokes."""
+    h, w = a.shape
+    bb = cv2.GaussianBlur(base, (0, 0), 5)
+    lum = bb.mean(2) + 1e-4
+    q = (np.floor(lum * levels) + 0.55) / levels
+    planes = np.clip(bb * (q / lum)[..., None] * 0.35 + bb * 0.65, 0, 1)
+    planes = cv2.GaussianBlur(planes, (0, 0), 1.2)
+    canvas = np.ascontiguousarray((planes * 255).astype(np.uint8))
+    sa = np.zeros((h, w), np.uint8)
+    ys, xs = np.nonzero(a > sample_thresh)
+    if len(xs) == 0:
+        return L
+    jitter = min(jitter, 0.05) * 0.4
+    for (n, Ln, w0, w1) in passes:
+        n = int(n / 4 * min(1.0, len(xs) / (w * h * 0.35)) + 80)
+        idx = rng.integers(0, len(xs), n)
+        jit = rng.normal(0, jitter, n)
+        an = rng.normal(0, angle_noise * 0.7, n)
+        ln = rng.uniform(0.6, 1.2, n) * Ln * 1.7
+        th = rng.uniform(w0, w1 + 1, n) * 2.2
+        cj = rng.uniform(-0.18, 0.18, (n, 4))
+        for k in range(n):
+            y, x = ys[idx[k]], xs[idx[k]]
+            c = np.clip(planes[y, x] * (1 + jit[k]), 0, 1) * 255
+            t = ang[y, x] + an[k]
+            ux, uy = math.cos(t), math.sin(t)
+            px, py = -uy, ux
+            L2, W2 = ln[k] / 2, th[k] / 2
+            pts = np.array([
+                (x - ux * L2 + px * W2 * (1 + cj[k, 0]), y - uy * L2 + py * W2 * (1 + cj[k, 0])),
+                (x + ux * L2 * (1 + cj[k, 1]) + px * W2, y + uy * L2 * (1 + cj[k, 1]) + py * W2),
+                (x + ux * L2 * (1 + cj[k, 2]) - px * W2, y + uy * L2 * (1 + cj[k, 2]) - py * W2),
+                (x - ux * L2 - px * W2 * (1 + cj[k, 3]), y - uy * L2 - py * W2 * (1 + cj[k, 3])),
+            ]) * 16
+            pts = pts.astype(np.int32)
+            cv2.fillPoly(canvas, [pts], (int(c[0]), int(c[1]), int(c[2])), cv2.LINE_AA, shift=4)
+            cv2.fillPoly(sa, [pts], 255, cv2.LINE_AA, shift=4)
+    out = canvas.astype(np.float32) / 255.0
+    if edge_fuzz:
+        near = cv2.GaussianBlur((a > 0.05).astype(np.float32), (0, 0), 3) > 0.35
+        na = np.maximum(a, sa.astype(np.float32) / 255.0 * near * 0.92)
     else:
         na = a
     L.rgb = out * na[..., None]

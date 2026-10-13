@@ -13,6 +13,7 @@ CREAM = hexc("#fbf0dc")
 def build_bg(col, seed, kind=None):
     L = Layer(W, H)
     base = hexc(col)
+    base = mix(base, np.full(3, base.mean(), np.float32), 0.15) * 0.92   # muted, deeper ground
     L.paint(np.ones((H, W), np.float32), base)
     rng = np.random.default_rng(seed)
     for i in range(16):
@@ -23,7 +24,7 @@ def build_bg(col, seed, kind=None):
         L.paint(m, c)
     yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
     edge = np.clip(((xx - W / 2) / (W * 0.62)) ** 2 + ((yy - H / 2) / (H * 0.62)) ** 2, 0, 1)
-    L.paint(edge * 0.5, mix(base, hexc("#3a1408"), 0.35))
+    L.paint(edge * 0.75, mix(base, hexc("#1e0c06"), 0.55))
     if kind == "spot":
         L.paint(L.mell((W / 2, 820), (520, 640), blur=160), mix(base, hexc("#e08a5a"), 0.45))
     if kind == "wallpaper":
@@ -41,7 +42,7 @@ def build_bg(col, seed, kind=None):
         L.paint(L.mline([(150, 0), (152, H)], 4, 4, smooth=False, blur=0.8), hexc("#c3423a"), 0.7)
         for y in (420, 960, 1500):
             L.paint(L.mell((70, y), (22, 22), blur=1), mix(base, hexc("#5a2a1a"), 0.35))
-    painterize(L, seed + 1, passes=((5500, 95, 14, 26), (8000, 46, 6, 12)),
+    painterize(L, seed + 1, style="impasto", passes=((5500, 95, 14, 26), (8000, 46, 6, 12)),
                angle=flow_field(W, H, seed, base=-0.55, amp=0.8, cell=320), angle_noise=0.18,
                jitter=0.035, edge_fuzz=False, soft=0.12, sample_thresh=0.0)
     return np.clip(L.rgb, 0, 1).astype(np.float32)
@@ -92,7 +93,7 @@ def build_flower(kind, seed, R=170):
             L.paint(L.mell((c + math.cos(a) * R * 0.45, c + math.sin(a) * R * 0.45), (R * 0.48, R * 0.36),
                            math.degrees(a), blur=1.5), mix(col, hexc("#e8a9b0"), rng.uniform(0, 0.3)))
         L.paint(L.mell((c, c), (R * 0.18, R * 0.18), blur=1.5), hexc("#c8603a"))
-        painterize(L, seed, passes=((500, R * 0.3, 2, 5),), jitter=0.04)
+        painterize(L, seed, style="impasto", passes=((500, R * 0.3, 2, 5),), jitter=0.04)
     elif kind == "leaf":
         pts = [(c - R * 1.2, c), (c - R * 0.3, c - R * 0.42), (c + R * 0.6, c - R * 0.3), (c + R * 1.25, c),
                (c + R * 0.6, c + R * 0.3), (c - R * 0.3, c + R * 0.42)]
@@ -138,7 +139,7 @@ def build_cameo(portrait):
     R.paint(R.mpoly([(cx - 70, cy - ay - 10), (cx, cy - ay - 90), (cx + 70, cy - ay - 10), (cx, cy - ay + 20)],
                     blur=1.5), hexc("#d4a23c"))
     R.paint(R.mell((cx, cy - ay - 40), (20, 20), blur=1), hexc("#b8322c"))
-    painterize(R, 6, passes=((2500, 16, 3, 7),), jitter=0.06, highlight=0.08, edge_fuzz=False)
+    painterize(R, 6, style="impasto", passes=((2500, 16, 3, 7),), jitter=0.06, highlight=0.08, edge_fuzz=False)
     L.over(R)
     return L.rgba()
 
@@ -177,7 +178,7 @@ def build_wheat(seed, h=760):
             L.paint(L.mell((top[0] + sgn * 13, top[1] - t * 110 + 10), (10, 22), sgn * 25, blur=1.2),
                     mix(hexc("#e9b551"), hexc("#f8dc8a"), rng.random()))
     L.paint(L.mline([(top[0], top[1] - 110), (top[0] + 6, top[1] - 170)], 2, 1, smooth=False, blur=1), hexc("#e9c070"))
-    painterize(L, seed, passes=((500, 14, 2, 5),), jitter=0.06)
+    painterize(L, seed, style="impasto", passes=((500, 14, 2, 5),), jitter=0.06)
     return L.rgba()
 
 
@@ -223,9 +224,9 @@ def build_glow(col, r=60):
 
 def build_branch(side, seed):
     rng = np.random.default_rng(seed)
-    BW, BH = 760, 760
+    BW, BH = 1000, 1000
     L = Layer(BW, BH)
-    x0 = 0 if side < 0 else BW
+    x0 = 120 if side < 0 else BW - 120
     blossoms = []
 
     def grow(p, ang, length, th, depth):
@@ -244,8 +245,8 @@ def build_branch(side, seed):
             for _ in range(2):
                 grow(pts[rng.integers(2, 5)], ang + rng.uniform(-0.8, 0.8), length * 0.6, th * 0.55, depth - 1)
 
-    grow((x0, 40), (0.35 if side < 0 else math.pi - 0.35), 620, 26, 2)
-    painterize(L, seed, passes=((1200, 14, 3, 7),), jitter=0.06, edge_fuzz=False)
+    grow((x0, 160), (0.35 if side < 0 else math.pi - 0.35), 620, 26, 2)
+    painterize(L, seed, style="impasto", passes=((1200, 14, 3, 7),), jitter=0.06, edge_fuzz=False)
     return L, blossoms
 
 
@@ -280,7 +281,7 @@ def build_house_picture():
     L.paint(L.mpoly([(138, 150), (162, 150), (162, 190), (138, 190)], smooth=False, blur=1), hexc("#7a3a22"))
     for x in (102, 178):
         L.paint(L.mpoly([(x, 135), (x + 20, 135), (x + 20, 155), (x, 155)], smooth=False, blur=1), hexc("#7fb2c9"))
-    painterize(L, 14, passes=((700, 12, 2, 5),), jitter=0.04, edge_fuzz=False)
+    painterize(L, 14, style="impasto", passes=((700, 12, 2, 5),), jitter=0.04, edge_fuzz=False)
     return L.rgba()
 
 
@@ -291,7 +292,7 @@ def build_clock():
     for k in range(12):
         a = k / 12 * math.tau
         L.paint(L.mell((110 + 68 * math.cos(a), 110 + 68 * math.sin(a)), (5, 5), blur=1), INK)
-    painterize(L, 15, passes=((500, 10, 2, 4),), jitter=0.04, edge_fuzz=False)
+    painterize(L, 15, style="impasto", passes=((500, 10, 2, 4),), jitter=0.04, edge_fuzz=False)
     return L.rgba()
 
 
@@ -328,7 +329,7 @@ def build_handmaid():
     L.shade(L.mpoly([(80, 70), (130, 110), (150, 300), (95, 300)], blur=6), hexc("#7a0e12"), 0.6)
     L.paint(L.mpoly([(28, 80), (40, 20), (80, 4), (120, 20), (132, 80), (112, 100), (80, 90), (48, 100)], blur=1.5),
             hexc("#f4ede2"))
-    painterize(L, 17, passes=((500, 14, 3, 6),), jitter=0.04, edge_fuzz=False)
+    painterize(L, 17, style="impasto", passes=((500, 14, 3, 6),), jitter=0.04, edge_fuzz=False)
     return L.rgba()
 
 
@@ -350,7 +351,7 @@ def build_card(w, h, seed=3):
     P = Layer(w + pad * 2, h + pad * 2)
     P.paint(P.mpoly(pts, smooth=False, blur=0.8), CREAM)
     P.shade(P.mell((pad + w * 0.7, pad + h * 0.8), (w * 0.6, h * 0.6), blur=100), hexc("#ecd8b6"), 0.6)
-    painterize(P, seed, passes=((2500, 60, 6, 12),), angle=np.full(P.a.shape, 0.05, np.float32), jitter=0.015,
+    painterize(P, seed, style="impasto", passes=((2500, 60, 6, 12),), angle=np.full(P.a.shape, 0.05, np.float32), jitter=0.015,
                edge_fuzz=False, soft=0.4)
     L.over(P)
     return L.rgba(), pad
@@ -362,7 +363,7 @@ def build_highlight(w, h, col, seed=4):
     top = [(10 + x, 10 + rng.uniform(-3, 5)) for x in np.linspace(0, w, 12)]
     bot = [(10 + x, 10 + h + rng.uniform(-5, 3)) for x in np.linspace(w, 0, 12)]
     L.paint(L.mpoly(top + bot, smooth=False, blur=1.2), hexc(col))
-    painterize(L, seed, passes=((900, 40, 4, 9),), angle=np.full(L.a.shape, 0.02, np.float32), jitter=0.04,
+    painterize(L, seed, style="impasto", passes=((900, 40, 4, 9),), angle=np.full(L.a.shape, 0.02, np.float32), jitter=0.04,
                angle_noise=0.05)
     return L.rgba()
 
