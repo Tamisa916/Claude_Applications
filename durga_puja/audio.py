@@ -186,7 +186,7 @@ def build():
             t += 4 * BEAT
     # temple bell at every scene change, conch at intro / UNESCO / finale
     for k, b in enumerate(B[1:], 1):
-        place(out, ghanta(880 if k % 2 else 990, 0.8), b - 0.05, 1.0, pan=0.3 if k % 2 else -0.3)
+        place(out, ghanta(880 if k % 2 else 990, 0.6), b - 0.25, 1.0, pan=0.3 if k % 2 else -0.3)
     for k in range(3):
         place(out, ghanta([1320, 1480, 1760][k], 0.35), B[5] + 0.4 + k * 0.8, 1.0, pan=[-0.6, 0.6, 0][k])
     place(out, shankh(2.6), 0.1, 1.0)

@@ -687,15 +687,28 @@ def scene_frame(A, k, lt):
 
 
 def draw(A, t):
+    """Soft transitions centred on each cut: feathered alpana-petal reveal + crossfade + zoom hand-off."""
     B = boundaries()
     k = max(j for j, b in enumerate(B) if t >= b)
-    lt = t - B[k]
-    fr = scene_frame(A, k, lt)
-    if k > 0 and lt < TR:  # alpana-petal radial wipe with a cream rim
-        old = scene_frame(A, k - 1, t - B[k - 1])
-        rad = ease_io(lt / TR) * (A["wipe"].max() + 60)
-        m = np.clip((rad - A["wipe"]) / 14.0, 0, 1)[..., None]
-        ring = np.clip(1 - np.abs(rad - 30 - A["wipe"]) / 16.0, 0, 1)[..., None]
-        fr = old * (1 - m) + fr * m
-        fr = fr * (1 - ring) + hexc("#f6ecd6") * ring
-    return fr
+    half = TR / 2
+    # find a cut within half a transition of t
+    cut = None
+    for j in range(1, len(B)):
+        if abs(t - B[j]) < half:
+            cut = j
+            break
+    if cut is None:
+        return scene_frame(A, k, t - B[k])
+    p = ease_io((t - (B[cut] - half)) / TR)
+    old = scene_frame(A, cut - 1, t - B[cut - 1])
+    new = scene_frame(A, cut, t - B[cut])
+    old = camera(old, 1.0 + 0.05 * p)            # outgoing scene keeps pushing in
+    new = camera(new, 1.0 + 0.07 * (1 - p))      # incoming scene settles from a slight zoom
+    feather = 260.0
+    rad = -feather + p * (A["wipe"].max() + 2 * feather)
+    m = np.clip((rad - A["wipe"]) / feather, 0, 1)
+    m = m * m * (3 - 2 * m)                      # smoothstep edge
+    m = (0.8 * m + 0.2 * p)[..., None]           # blend in a little straight crossfade
+    fr = old * (1 - m) + new * m
+    ring = np.exp(-((rad - feather * 0.5 - A["wipe"]) / 70.0) ** 2) * math.sin(math.pi * p) * 0.18
+    return fr * (1 - ring[..., None]) + hexc("#f6ecd6") * ring[..., None]
