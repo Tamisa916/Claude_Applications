@@ -109,6 +109,9 @@ def head(F, s, dy=0):
     if s.get("glasses"):
         for sg in (-1, 1):
             F.ell((sg * 10, -431), (7, 6), None, dy=dy, lw=max(1, F.lw * 0.5))
+    if s.get("sindoor_khela"):  # vermilion smeared on cheeks and forehead after Bijoya
+        for (cx, cy, rx, ry) in ((-14, -420, 9, 6), (14, -420, 9, 6), (0, -452, 14, 5)):
+            F.ell((cx, cy), (rx, ry), "#d4231c", dy=dy, lw=0)
     if s.get("mask"):
         F.shape([(-22, -424), (22, -424), (18, -400), (-18, -400)], "#a9d3e0", dy=dy)
 
